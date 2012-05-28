@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 28 May 2012 02:21:47 AM
+#Last-modified: 28 May 2012 02:56:05 AM
 
 from tempfile import mkstemp
 import os
@@ -79,7 +79,9 @@ def unTarAndModify(filename):
     for texfile in texfiles :
         texfile = os.path.join(desdir, texfile)
         if 'documentclass' in open(texfile).read():
-            masterfile = texfile
+            # make sure master file is main.tex
+            masterfile = os.path.join(desdir, "main.tex")
+            shutil.move(texfile, masterfile)
     if masterfile :
         print("master tex file is %s"%masterfile)
     else :
