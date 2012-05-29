@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 29 May 2012 07:37:53 PM
+#Last-modified: 29 May 2012 07:51:56 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -131,8 +131,7 @@ def checkMaster(masterfile) :
     f = open(masterfile, "r")
     p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
     q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
-#    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~]*)\]\s*\{([\w|\s|\.|\~]+)")
-    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~]*)\]")
+    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~|\\\\|\&]*)\]")
     for line in f.readlines():
         presult = p.match(line)
         if presult :
@@ -155,7 +154,10 @@ def checkMaster(masterfile) :
         raise KindleException("missing classname?")
     if firstauthor :
         firstauthor = firstauthor.replace("~", " ")
-        author = firstauthor.split()[0]
+        if classname == "mn2e" :
+            author = firstauthor.split()[0]
+        else :
+            author = firstauthor.split()[1]
     else :
         author = "unknown"
     print("author: %s"%author)
@@ -435,6 +437,7 @@ if __name__ == '__main__':
     arxivid = args.id
     fname, year  = getTar(arxivid)
     newpdf = unTarAndModify(fname, year)
+    print(newpdf)
     if newpdf :
         try :
             os.system("evince "+newpdf)
@@ -442,7 +445,6 @@ if __name__ == '__main__':
             os.system("mupdf2 "+newpdf)
     else :
         raise RuntimeError("failed")
-    print(newpdf)
     dropit(newpdf)
 
 
