@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 28 May 2012 05:45:27 PM
+#Last-modified: 28 May 2012 09:07:07 PM
 
 import os
 from os.path import basename, join
@@ -68,6 +68,12 @@ def unTarAndModify(filename, year):
         print('%20s  is a tar file? %s \n exiting' % (filename, err))
         return(None)
     t = tarfile.open(filename, 'r')
+    # find all the figure files
+    psfiles = []
+    for files in t.getnames() :
+        if file.endswith(".ps") :
+            print("found ps image in the tar bundle %s" % file)
+            psfiles.append(file)
     desdir = os.path.join(saveDir, "outdir")
     if os.path.exists(desdir):
         shutil.rmtree(desdir)
@@ -157,7 +163,9 @@ def unTarAndModify(filename, year):
             shutil.copy(os.path.join(clibDir, bstfile), desdir)
         else :
             print("probably the references will be messed up")
-
+    # convert ps files
+    #FIXME
+#    batch_ps2eps(psfiles)
     if classoption :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
         if len(classopts) == 0 :
@@ -375,6 +383,8 @@ if __name__ == '__main__':
     newpdf = unTarAndModify(fname, year)
     if newpdf :
         os.system("evince "+newpdf)
+    else :
+        raise RuntimeError("failed")
     dropit(newpdf)
 
 
