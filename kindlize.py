@@ -1,8 +1,6 @@
 #!/usr/bin/env python
-#Last-modified: 28 May 2012 11:08:36 PM
-
+#Last-modified: 29 May 2012 07:37:53 PM
 import os
-from os.path import basename, join
 from urlparse import urlsplit
 from tempfile import mkstemp
 import urllib2
@@ -16,7 +14,6 @@ saveDir = os.path.expanduser("~/tmp/")
 origDir = os.path.expanduser("~/mercurial/kindlize/")
 clibDir = os.path.expanduser("~/mercurial/kindlize/clslib/")
 dropDir = os.path.expanduser("~/Dropbox/kindle_sync/")
-
 
 # syle regexp taken directly from arxiv2bib
 NEW_STYLE = re.compile(r'\d{4}\.\d{4}(v\d+)?$')
@@ -35,8 +32,14 @@ jname = { "elsart_mm" : "Elsevier Science",
           "mn2e"      : "MNRAS",
         }
 
+banned_packages = ["hyperref", "emulateapj5"]
+
+class KindleException(Exception):
+    pass
+
+
 def url2name(url):
-    return(basename(urlsplit(url)[2]))
+    return(os.path.basename(urlsplit(url)[2]))
 
 def download(url):
     localName = url2name(url)
@@ -52,7 +55,7 @@ def download(url):
         localName = url2name(r.url)
     # get it to a default directory
     if saveDir is not None:
-        absFileName = join(saveDir, localName)
+        absFileName = os.path.join(saveDir, localName)
     else:
         absFileName = localName
     print("as %s" % absFileName)
@@ -61,32 +64,25 @@ def download(url):
     f.close()
     return(absFileName)
 
-def unTarAndModify(filename, year):
-    try :
-        print('%20s  is a tar file? %s \n continue' % (filename, tarfile.is_tarfile(filename)))
-    except IOError, err :
-        print('%20s  is a tar file? %s \n exiting' % (filename, err))
-        return(None)
-    t = tarfile.open(filename, 'r')
-    # find all the figure files
-    psfiles = []
+def findFigs(t, ext="ps"):
+    # find all the ps figure files
+    figfiles = []
     for file in t.getnames() :
-        if file.endswith(".ps") :
-            print("found ps image in the tar bundle %s" % file)
-            psfiles.append(file)
-    desdir = os.path.join(saveDir, "outdir")
+        if file.endswith("."+ext) :
+            print("found %s image in the tar bundle %s" % (ext, file))
+            figfiles.append(file)
+    return(figfiles)
+
+def force_mkdir(desdir):
     if os.path.exists(desdir):
         shutil.rmtree(desdir)
-    else:
-        pass
-    #
-    try :
-        os.mkdir(desdir)
-    except OSError, err :
-        print("mkdir %s failed, %s"%(desdir, err))
-        return(None)
-    # extract tar
-    t.extractall(desdir)
+    else :
+        try :
+            os.mkdir(desdir)
+        except OSError, err :
+            raise KindleException("mkdir %s failed, %s"%(desdir, err))
+
+def examine_texenv(desdir):
     texfiles = []
     clsfiles = []
     bstfiles = []
@@ -104,78 +100,83 @@ def unTarAndModify(filename, year):
         elif file.endswith(".bbl") :
             print("found bbl file in the tar bundle %s" % file)
             bblfiles.append(file)
-#   go through all files
+    return(texfiles, clsfiles, bstfiles, bblfiles)
+
+def getMaster(texfiles, desdir):
     masterfile = None
     for texfile in texfiles :
         texfile = os.path.join(desdir, texfile)
         if 'documentclass' in open(texfile).read():
             # make sure master file is main.tex
+            print("copying main tex file")
             masterfile = os.path.join(desdir, "main.tex")
             shutil.move(texfile, masterfile)
-    if masterfile :
-        print("master tex file is %s"%masterfile)
-    else :
-        print("missing master tex file or stone-age tex version?")
-        return(None)
+    if masterfile is None :
+        raise KindleException("missing master tex file or stone-age tex version?")
+    return(masterfile)
+            
+def getBiblio(bblfiles, desdir):
     # copy bbl if there is one and only one such file
     if len(bblfiles) == 1 :
         # make sure this works
-        print("copying bbl file")
+        print("copying main bbl file")
         bblfile_old = os.path.join(desdir, bblfiles[0])
         bblfile_new = os.path.join(desdir, "main.bbl")
         shutil.move(bblfile_old, bblfile_new)
-#   play with master file
+
+def checkMaster(masterfile) :
     classname   = None
     classoption = None
     firstauthor = None
     f = open(masterfile, "r")
     p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
+    q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
+#    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~]*)\]\s*\{([\w|\s|\.|\~]+)")
+    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~]*)\]")
     for line in f.readlines():
         presult = p.match(line)
         if presult :
             classoption = presult.group(1)
             classname   = presult.group(2)
+        #
+        if classname is None :
+            qresult = None
+        elif classname == "mn2e" :
+            qresult = q_mn.match(line)
+        else :
+            qresult = q.match(line)
+        #
+        if qresult : 
+            firstauthor = qresult.group(1)
     f.close()
     if classname :
         print("documentclass is %s"% classname)
     else :
-        print("missing classname?")
-        return(None)
-    # search for authors
-    q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
-    q_mn = re.compile("[^\%]author\[[\w|\s|\.|\~]*\]\s*\{([\w|\s|\.|\~]+)")
-    f = open(masterfile, "r")
-    for line in f.readlines():
-        if classname == "mn2e" :
-            qresult = q_mn.match(line)
-        else :
-            qresult = q.match(line)
-        if qresult : 
-            firstauthor = qresult.group(1)
-    f.close()
+        raise KindleException("missing classname?")
     if firstauthor :
         firstauthor = firstauthor.replace("~", " ")
-        author = firstauthor.split()[-1]
+        author = firstauthor.split()[0]
     else :
         author = "unknown"
     print("author: %s"%author)
-    # make sure the cls file exist
+    return(classoption, classname, author)
+
+def getClass(classname, clsfiles, bstfiles, desdir):
     clsfile = ".".join([classname, "cls"])
     if not (clsfile in clsfiles) :
         print("%s needed"%clsfile)
         if file_exists(os.path.join(clibDir, clsfile)):
             shutil.copy(os.path.join(clibDir, clsfile), desdir)
         else :
-            print("failed to find it in the cls library")
-            return(None)
+            raise KindleException("failed to find it in the cls library")
     bstfile = ".".join([classname, "bst"])
     if not (bstfile in bstfiles) :
         if file_exists(os.path.join(clibDir, bstfile)):
             shutil.copy(os.path.join(clibDir, bstfile), desdir)
         else :
             print("probably the references will be messed up")
-    # convert ps files
-    epsfiles = batch_ps2eps(desdir, psfiles)
+
+def getOpt(classoption):
     if classoption :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
         if len(classopts) == 0 :
@@ -188,12 +189,39 @@ def unTarAndModify(filename, year):
         classopts = []
         hasoptbracket = False
         print("no class options")
+    return(hasoptbracket, classopts)
+
+def unTarAndModify(filename, year):
+    try :
+        print('%20s  is a tar file? %s \n continue' % (filename, tarfile.is_tarfile(filename)))
+    except IOError, err :
+        print('%20s  is a tar file? %s \n exiting' % (filename, err))
+        return(None)
+    # desdir: intermediate directory to store files and recompile, should be
+    # non-existent otherwise will be wiped out the code
+    desdir = os.path.join(saveDir, "outdir")
+    force_mkdir(desdir)
+    # open the tar file
+    t = tarfile.open(filename, 'r')
+    pdffiles = findFigs(t, "pdf")
+    if len(pdffiles) > 0 :
+        use_pdflatex = True
+    else :
+        use_pdflatex = False
+    t.extractall(desdir)
+    texfiles, clsfiles, bstfiles, bblfiles = examine_texenv(desdir)
+    # go through all files
+    masterfile = getMaster(texfiles, desdir)
+    getBiblio(bblfiles, desdir)
+    classoption, classname, author = checkMaster(masterfile)
+    getClass(classname, clsfiles, bstfiles, desdir)
+    hasoptbracket, classopts = getOpt(classoption)
     # parse class
     col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
     # substitute
-    kindlizeit(masterfile, hasoptbracket, classname, psfiles, epsfiles, col_set, onecol_arg, twocol_arg)
+    kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg)
     # recompile
-    pdfout = do_latex(desdir, masterfile)
+    pdfout = do_latex(desdir, masterfile, use_pdflatex=use_pdflatex)
     # rename
     newpdfname = author + year + ".pdf"
     newpdf = os.path.join(desdir, newpdfname)
@@ -217,10 +245,14 @@ def batch_ps2eps(desdir, psfiles) :
 
    
 def dropit(pdf) :
+    print("drop it into dropbox %s"%dropDir)
     shutil.copy(pdf, dropDir)
 
-def do_latex(desdir, masterfile) :
-    mkfile = os.path.join(origDir, "Makefile_latex")
+def do_latex(desdir, masterfile, use_pdflatex=False) :
+    if use_pdflatex :
+        mkfile = os.path.join(origDir, "Makefile_pdflatex")
+    else :
+        mkfile = os.path.join(origDir, "Makefile_latex")
     shutil.copy(mkfile, os.path.join(desdir, "Makefile"))
     cwd = os.getcwd() # get current directory
     os.chdir(desdir)
@@ -245,7 +277,7 @@ def file_exists(file):
         return(False)
 
 
-def kindlizeit(masterfile, hasoptbracket, classname, psfiles, epsfiles, col_set, onecol_arg, twocol_arg):
+def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg):
     if col_set == "one" :
         pass
     elif col_set == "two" :
@@ -272,12 +304,10 @@ def kindlizeit(masterfile, hasoptbracket, classname, psfiles, epsfiles, col_set,
     else :
         subst = kindlestr+r"\\begin{document}"
     substituteAll(masterfile, p, subst)
-    # comment out hyperref
-    p = re.compile("[^\%]usepackage(.*)\{hyperref\}")
-    commentALL(masterfile, p)
-    # change to use eps
-    for psfile, epsfile in zip(psfiles, epsfiles) :
-        replaceAll(masterfile, psfile, epsfile)
+    # comment out banned package
+    for pack in banned_packages :
+        p = re.compile("[^\%]usepackage(.*)\{" + pack +"\}")
+        commentALL(masterfile, p)
 
 
 def parse_documentclass(classname, classopts):
@@ -404,14 +434,15 @@ if __name__ == '__main__':
     args = parse_args()
     arxivid = args.id
     fname, year  = getTar(arxivid)
-#    fname =  "/home/nye/tmp/1205.5801"
-#    year = "12"
     newpdf = unTarAndModify(fname, year)
     if newpdf :
-#        os.system("evince "+newpdf)
-        os.system("mupdf2 "+newpdf)
+        try :
+            os.system("evince "+newpdf)
+        except :
+            os.system("mupdf2 "+newpdf)
     else :
         raise RuntimeError("failed")
+    print(newpdf)
     dropit(newpdf)
 
 
