@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 28 May 2012 10:40:08 PM
+#Last-modified: 28 May 2012 11:08:36 PM
 
 import os
 from os.path import basename, join
@@ -130,24 +130,35 @@ def unTarAndModify(filename, year):
     firstauthor = None
     f = open(masterfile, "r")
     p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
-    q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
-    q_mn = re.compile("[^\%]author\[[\w|\s|\.|\~]*\]\{([\w|\s|\.|\~]+)")
     for line in f.readlines():
         presult = p.match(line)
-        qresult = q.match(line)
-        qresult_mn = q_mn.match(line)
         if presult :
             classoption = presult.group(1)
             classname   = presult.group(2)
-        if qresult : 
-            firstauthor = qresult.group(1)
-        elif qresult_mn :
-            firstauthor = qresult_mn.group(1)
+    f.close()
     if classname :
         print("documentclass is %s"% classname)
     else :
         print("missing classname?")
         return(None)
+    # search for authors
+    q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
+    q_mn = re.compile("[^\%]author\[[\w|\s|\.|\~]*\]\s*\{([\w|\s|\.|\~]+)")
+    f = open(masterfile, "r")
+    for line in f.readlines():
+        if classname == "mn2e" :
+            qresult = q_mn.match(line)
+        else :
+            qresult = q.match(line)
+        if qresult : 
+            firstauthor = qresult.group(1)
+    f.close()
+    if firstauthor :
+        firstauthor = firstauthor.replace("~", " ")
+        author = firstauthor.split()[-1]
+    else :
+        author = "unknown"
+    print("author: %s"%author)
     # make sure the cls file exist
     clsfile = ".".join([classname, "cls"])
     if not (clsfile in clsfiles) :
@@ -177,11 +188,6 @@ def unTarAndModify(filename, year):
         classopts = []
         hasoptbracket = False
         print("no class options")
-    if firstauthor :
-        firstauthor = firstauthor.replace("~", " ")
-        author = firstauthor.split()[-1]
-    else :
-        author = "unknown"
     # parse class
     col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
     # substitute
