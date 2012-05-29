@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 28 May 2012 09:07:07 PM
+#Last-modified: 28 May 2012 10:40:08 PM
 
 import os
 from os.path import basename, join
@@ -70,7 +70,7 @@ def unTarAndModify(filename, year):
     t = tarfile.open(filename, 'r')
     # find all the figure files
     psfiles = []
-    for files in t.getnames() :
+    for file in t.getnames() :
         if file.endswith(".ps") :
             print("found ps image in the tar bundle %s" % file)
             psfiles.append(file)
@@ -164,8 +164,7 @@ def unTarAndModify(filename, year):
         else :
             print("probably the references will be messed up")
     # convert ps files
-    #FIXME
-#    batch_ps2eps(psfiles)
+    epsfiles = batch_ps2eps(desdir, psfiles)
     if classoption :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
         if len(classopts) == 0 :
@@ -186,7 +185,7 @@ def unTarAndModify(filename, year):
     # parse class
     col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
     # substitute
-    kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg)
+    kindlizeit(masterfile, hasoptbracket, classname, psfiles, epsfiles, col_set, onecol_arg, twocol_arg)
     # recompile
     pdfout = do_latex(desdir, masterfile)
     # rename
@@ -194,6 +193,22 @@ def unTarAndModify(filename, year):
     newpdf = os.path.join(desdir, newpdfname)
     shutil.move(pdfout, newpdf)
     return(newpdf)
+
+def batch_ps2eps(desdir, psfiles) :
+    """ convert ps into eps"""
+    if len(psfiles) == 0 :
+        return([])
+    epsfiles = []
+    for psfile in psfiles :
+        epsfile = psfile.replace(".ps", ".eps")
+        cmd = " ".join(["ps2eps", os.path.join(desdir, psfile), os.path.join(desdir, epsfile)])
+        print(cmd)
+        os.system(cmd)
+        fixeps = " ".join([os.path.join(origDir, "fixbbox.sh"), os.path.join(desdir, epsfile)])
+        os.system(fixeps)
+        epsfiles.append(epsfile)
+    return(epsfiles)
+
    
 def dropit(pdf) :
     shutil.copy(pdf, dropDir)
@@ -224,7 +239,7 @@ def file_exists(file):
         return(False)
 
 
-def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg):
+def kindlizeit(masterfile, hasoptbracket, classname, psfiles, epsfiles, col_set, onecol_arg, twocol_arg):
     if col_set == "one" :
         pass
     elif col_set == "two" :
@@ -254,6 +269,9 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
     # comment out hyperref
     p = re.compile("[^\%]usepackage(.*)\{hyperref\}")
     commentALL(masterfile, p)
+    # change to use eps
+    for psfile, epsfile in zip(psfiles, epsfiles) :
+        replaceAll(masterfile, psfile, epsfile)
 
 
 def parse_documentclass(classname, classopts):
@@ -380,9 +398,12 @@ if __name__ == '__main__':
     args = parse_args()
     arxivid = args.id
     fname, year  = getTar(arxivid)
+#    fname =  "/home/nye/tmp/1205.5801"
+#    year = "12"
     newpdf = unTarAndModify(fname, year)
     if newpdf :
-        os.system("evince "+newpdf)
+#        os.system("evince "+newpdf)
+        os.system("mupdf2 "+newpdf)
     else :
         raise RuntimeError("failed")
     dropit(newpdf)
