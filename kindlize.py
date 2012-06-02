@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 29 May 2012 07:51:56 PM
+#Last-modified: 02 Jun 2012 01:01:46 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -30,6 +30,7 @@ jname = { "elsart_mm" : "Elsevier Science",
           "emulateapj": "ApJ",
           "aastex"    : "AAS Preprint",
           "mn2e"      : "MNRAS",
+          "article"   : "Generic Article",
         }
 
 banned_packages = ["hyperref", "emulateapj5"]
@@ -164,6 +165,9 @@ def checkMaster(masterfile) :
     return(classoption, classname, author)
 
 def getClass(classname, clsfiles, bstfiles, desdir):
+    if classname == "article" :
+        # safe
+        return(None)
     clsfile = ".".join([classname, "cls"])
     if not (clsfile in clsfiles) :
         print("%s needed"%clsfile)
@@ -314,8 +318,9 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
 
 def parse_documentclass(classname, classopts):
     col_set = "default"
-    if (classname == "elsart_mm" or classname == "aa" or classname ==
-    "emulateapj" or classname == "aastex" or classname == "mn2e") :
+    if (classname == "elsart_mm"  or classname == "aa" or
+        classname == "emulateapj" or classname == "aastex" or 
+        classname == "mn2e"       or classname == "article") :
         print("Journal Name: %20s"%jname[classname])
         print("`one/twocolumn` option is available")
         onecol_arg = "onecolumn"
