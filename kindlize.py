@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 02 Jun 2012 01:01:46 AM
+#Last-modified: 12 Jun 2012 12:25:14 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -22,7 +22,10 @@ OLD_STYLE = re.compile( r'(astro-ph)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
 # geometry configuration
 kindlestr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
 kindlestr_apj = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.3cm, left=1.5cm, right=0.0cm, bottom=-1.0cm]{geometry}\n"
-kindlestr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=1.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
+kindlestr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
+
+# enbiggen font
+fontstr = "\n"+r"\\fontsize{14pt}{12pt}\selectfont"+"\n"
 
 # latex cls library
 jname = { "elsart_mm" : "Elsevier Science",
@@ -304,11 +307,11 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
     # add kindlestr 
     p = re.compile(r"^\\begin{document}")
     if classname == "emulateapj" :
-        subst = kindlestr_apj+r"\\begin{document}"
+        subst = kindlestr_apj+r"\\begin{document}" + fontstr
     elif classname == "mn2e" :
-        subst = kindlestr_mn+r"\\begin{document}"
+        subst = kindlestr_mn+r"\\begin{document}" + fontstr
     else :
-        subst = kindlestr+r"\\begin{document}"
+        subst = kindlestr+r"\\begin{document}" + fontstr
     substituteAll(masterfile, p, subst)
     # comment out banned package
     for pack in banned_packages :
