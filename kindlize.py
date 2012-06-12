@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 12 Jun 2012 12:25:14 AM
+#Last-modified: 12 Jun 2012 12:34:04 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -24,8 +24,11 @@ kindlestr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, l
 kindlestr_apj = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.3cm, left=1.5cm, right=0.0cm, bottom=-1.0cm]{geometry}\n"
 kindlestr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
 
+# font name
+fontstr = "\usepackage{charter}\n"
+
 # enbiggen font
-fontstr = "\n"+r"\\fontsize{14pt}{12pt}\selectfont"+"\n"
+magnifystr = "\n"+r"\\fontsize{14pt}{18pt}\selectfont"+"\n"
 
 # latex cls library
 jname = { "elsart_mm" : "Elsevier Science",
@@ -307,11 +310,11 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
     # add kindlestr 
     p = re.compile(r"^\\begin{document}")
     if classname == "emulateapj" :
-        subst = kindlestr_apj+r"\\begin{document}" + fontstr
+        subst = kindlestr_apj+fontstr+r"\\begin{document}"+magnifystr
     elif classname == "mn2e" :
-        subst = kindlestr_mn+r"\\begin{document}" + fontstr
+        subst = kindlestr_mn+fontstr+r"\\begin{document}"+magnifystr
     else :
-        subst = kindlestr+r"\\begin{document}" + fontstr
+        subst = kindlestr+fontstr+r"\\begin{document}"+magnifystr
     substituteAll(masterfile, p, subst)
     # comment out banned package
     for pack in banned_packages :
