@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 12 Jun 2012 08:01:36 PM
+#Last-modified: 13 Jun 2012 03:32:17 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -44,6 +44,8 @@ jname = { "elsart_mm" : "Elsevier Science",
 
 #banned_packages = ["hyperref", "emulateapj5"]
 banned_packages = ["emulateapj5"]
+
+old_files = ["aaspp4.sty", "psfig.sty", "flushrt.sty", "mn.cls"]
 
 class KindleException(Exception):
     pass
@@ -117,14 +119,22 @@ def getMaster(texfiles, desdir):
     masterfile = None
     for texfile in texfiles :
         texfile = os.path.join(desdir, texfile)
-        if 'documentclass' in open(texfile).read():
+        content = open(texfile).read()
+        if 'documentclass' in content:
             # make sure master file is main.tex
             print("copying main tex file")
             masterfile = os.path.join(desdir, "main.tex")
             shutil.move(texfile, masterfile)
+            texversion = "latex2e"
+        elif r'\begin{document}' in content:
+            # make sure master file is main.tex
+            print("copying main tex file, possibly latex2.09 file")
+            masterfile = os.path.join(desdir, "main.tex")
+            shutil.move(texfile, masterfile)
+            texversion = "latex2.09"
     if masterfile is None :
         raise KindleException("missing master tex file or stone-age tex version?")
-    return(masterfile)
+    return(masterfile, texversion)
             
 def getBiblio(bblfiles, desdir):
     # copy bbl if there is one and only one such file
@@ -135,7 +145,23 @@ def getBiblio(bblfiles, desdir):
         print("copying main bbl file  from %s"% bblfiles[0])
         shutil.copy(bblfile_old, bblfile_new)
 
-def checkMaster(masterfile) :
+def checkMaster(masterfile, texversion) :
+    if texversion == "latex2.09" :
+        classname   = "old"
+        classoption = "old"
+        f = open(masterfile, "r")
+        q = re.compile("[^\%]author[\[|\]|\w|\s|\.|\~]*\{([\w|\s|\.|\~]+)")
+        for line in f.readlines():
+            qresult = q.match(line)
+            if qresult : 
+                firstauthor = qresult.group(1)
+                break
+        if qresult : 
+            author = firstauthor.split()[-1]
+        else :
+            author = "unknown"
+        f.close()
+        return(classoption, classname, author)
     classname   = None
     classoption = None
     firstauthor = None
@@ -183,7 +209,7 @@ def checkMaster(masterfile) :
     return(classoption, classname, author)
 
 def getClass(classname, clsfiles, bstfiles, desdir):
-    if classname == "article" :
+    if classname == "article" or classname == "old" :
         # safe
         return(None)
     clsfile = ".".join([classname, "cls"])
@@ -205,7 +231,7 @@ def getClass(classname, clsfiles, bstfiles, desdir):
                 print("probably the references will be messed up")
 
 def getOpt(classoption):
-    if classoption :
+    if classoption != "old" and classoption is not None :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
         if len(classopts) == 0 :
             print("empty class options")
@@ -240,9 +266,11 @@ def unTarAndModify(filename, year):
     t.extractall(desdir)
     texfiles, clsfiles, bstfiles, bblfiles = examine_texenv(desdir)
     # go through all files
-    masterfile = getMaster(texfiles, desdir)
+    masterfile, texversion = getMaster(texfiles, desdir)
+    # deal with old latex2.09 files
+    handleOldTeX(texversion, desdir)
     getBiblio(bblfiles, desdir)
-    classoption, classname, author = checkMaster(masterfile)
+    classoption, classname, author = checkMaster(masterfile, texversion)
     getClass(classname, clsfiles, bstfiles, desdir)
     hasoptbracket, classopts = getOpt(classoption)
     # parse class
@@ -256,6 +284,12 @@ def unTarAndModify(filename, year):
     newpdf = os.path.join(desdir, newpdfname)
     shutil.move(pdfout, newpdf)
     return(newpdf)
+
+def handleOldTeX(texversion, desdir) :
+    if texversion == "latex2.09" :
+        for file in old_files :
+            fold = os.path.join(clibDir, file)
+            shutil.copy(fold, desdir)
 
 def batch_ps2eps(desdir, psfiles) :
     """ convert ps into eps"""
@@ -345,6 +379,8 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
         subst = kindlestr_mn+fontstr+r"\\begin{document}"+magnifystr
     elif classname == "elsarticle" :
         subst = kindlestr_els+fontstr+r"\\begin{document}"+magnifystr
+    elif classname == "old" :
+        subst = r"\\begin{document}"+magnifystr
     else :
         subst = kindlestr+fontstr+r"\\begin{document}"+magnifystr
     substituteAll(masterfile, p, subst)
@@ -363,6 +399,8 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
 
 
 def parse_documentclass(classname, classopts):
+    if classname == "old" :
+        return("default", None, None)
     col_set = "default"
     if (classname == "elsart_mm"  or classname == "aa" or
         classname == "emulateapj" or classname == "aastex" or 

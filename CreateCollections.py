@@ -21,6 +21,9 @@ print "[#] Device path: %s" % device_path
 COLLECTIONS_FILE_PATH = device_path + "/system/collections.json"
 DOCUMENTS_DIR_PATH = device_path + "/documents/"
 
+
+isnode = {}
+
 # Function parses given folder, by creating new collection for it, adding all
 # the files from this folder to the collection, and parsing all the subfolders
 # recursively 
@@ -33,10 +36,16 @@ def ParseFolder(path, collections):
   # Create new collection for current folder
   new_collection = {"items":[]}
 
+  # Collection name is of the form directory - sub-directory - sub-sub-directory...
+  collection_name = relative_path.replace("/", " - ")[:-1]
+
+  isnode[collection_name] = False
+
   # Go through all the items in this directory
   for filename in os.listdir(path):
     # Check if is a file
     if os.path.isfile(path + filename):
+      isnode[collection_name] = True
       # Get extension of that file
       extension = filename.split(".")[-1]
       # Check if file is the one we would want to add
@@ -51,12 +60,12 @@ def ParseFolder(path, collections):
       # Parse this sub-directory recursively
       ParseFolder(path + filename + "/", collections)
 
-  # Collection name is of the form directory - sub-directory - sub-sub-directory...
-  collection_name = relative_path.replace("/", " - ")[:-1]
 
   # We do not want to add root directory to the collections
-  if collection_name != '':
+  if collection_name != '' and isnode[collection_name] is True:
+    print("add {%s}"%collection_name)
     collections[collection_name + "@en-US"] = new_collection
+   
 
 try:
   # Check that such device path exists
