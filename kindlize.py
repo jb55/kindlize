@@ -1,8 +1,9 @@
 #!/usr/bin/env python
-#Last-modified: 12 Jun 2012 12:34:04 AM
+#Last-modified: 12 Jun 2012 08:01:36 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
+from glob import glob
 import urllib2
 import tarfile
 import shutil
@@ -23,6 +24,7 @@ OLD_STYLE = re.compile( r'(astro-ph)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
 kindlestr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
 kindlestr_apj = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.3cm, left=1.5cm, right=0.0cm, bottom=-1.0cm]{geometry}\n"
 kindlestr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
+kindlestr_els = "\usepackage[paperwidth=15.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.3cm]{geometry}\n"
 
 # font name
 fontstr = "\usepackage{charter}\n"
@@ -37,9 +39,11 @@ jname = { "elsart_mm" : "Elsevier Science",
           "aastex"    : "AAS Preprint",
           "mn2e"      : "MNRAS",
           "article"   : "Generic Article",
+          "elsarticle": "Elsevier Science",
         }
 
-banned_packages = ["hyperref", "emulateapj5"]
+#banned_packages = ["hyperref", "emulateapj5"]
+banned_packages = ["emulateapj5"]
 
 class KindleException(Exception):
     pass
@@ -126,10 +130,10 @@ def getBiblio(bblfiles, desdir):
     # copy bbl if there is one and only one such file
     if len(bblfiles) == 1 :
         # make sure this works
-        print("copying main bbl file")
         bblfile_old = os.path.join(desdir, bblfiles[0])
         bblfile_new = os.path.join(desdir, "main.bbl")
-        shutil.move(bblfile_old, bblfile_new)
+        print("copying main bbl file  from %s"% bblfiles[0])
+        shutil.copy(bblfile_old, bblfile_new)
 
 def checkMaster(masterfile) :
     classname   = None
@@ -138,7 +142,8 @@ def checkMaster(masterfile) :
     f = open(masterfile, "r")
     p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
     q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
-    q_mn = re.compile("[^\%]author\[([\w|\s|\.|\~|\\\\|\&]*)\]")
+    q_mn  = re.compile("[^\%]author\[([\w|\s|\.|\~|\\\\|\&]*)\]")
+    q_els = re.compile("[^\%]author\[[\d|\,]*\]\{([\w|\s|\.|\~]+)\}")
     for line in f.readlines():
         presult = p.match(line)
         if presult :
@@ -149,11 +154,14 @@ def checkMaster(masterfile) :
             qresult = None
         elif classname == "mn2e" :
             qresult = q_mn.match(line)
+        elif classname == "elsarticle" :
+            qresult = q_els.match(line)
         else :
             qresult = q.match(line)
         #
         if qresult : 
             firstauthor = qresult.group(1)
+            break
     f.close()
     if classname :
         print("documentclass is %s"% classname)
@@ -161,10 +169,14 @@ def checkMaster(masterfile) :
         raise KindleException("missing classname?")
     if firstauthor :
         firstauthor = firstauthor.replace("~", " ")
-        if classname == "mn2e" :
-            author = firstauthor.split()[0]
-        else :
-            author = firstauthor.split()[1]
+        firstauthor = firstauthor.replace(". ", "_")
+        try :
+            if classname == "mn2e" :
+                author = firstauthor.split()[0]
+            else :
+                author = firstauthor.split()[-1]
+        except IndexError:
+            author = "unknown"
     else :
         author = "unknown"
     print("author: %s"%author)
@@ -182,11 +194,15 @@ def getClass(classname, clsfiles, bstfiles, desdir):
         else :
             raise KindleException("failed to find it in the cls library")
     bstfile = ".".join([classname, "bst"])
-    if not (bstfile in bstfiles) :
-        if file_exists(os.path.join(clibDir, bstfile)):
-            shutil.copy(os.path.join(clibDir, bstfile), desdir)
-        else :
-            print("probably the references will be messed up")
+    if classname == "emulateapj" :
+        # just copy the apj.bst file
+        shutil.copy(os.path.join(clibDir, "apj.bst"), desdir)
+    else :
+        if not (bstfile in bstfiles) :
+            if file_exists(os.path.join(clibDir, bstfile)):
+                shutil.copy(os.path.join(clibDir, bstfile), desdir)
+            else :
+                print("probably the references will be messed up")
 
 def getOpt(classoption):
     if classoption :
@@ -216,7 +232,8 @@ def unTarAndModify(filename, year):
     # open the tar file
     t = tarfile.open(filename, 'r')
     pdffiles = findFigs(t, "pdf")
-    if len(pdffiles) > 0 :
+    pngfiles = findFigs(t, "png")
+    if len(pdffiles) > 0 or len(pngfiles) > 0:
         use_pdflatex = True
     else :
         use_pdflatex = False
@@ -256,9 +273,22 @@ def batch_ps2eps(desdir, psfiles) :
     return(epsfiles)
 
    
-def dropit(pdf) :
-    print("drop it into dropbox %s"%dropDir)
-    shutil.copy(pdf, dropDir)
+def dropit(inpdf) :
+    pdf = os.path.basename(inpdf)
+    print("drop %s into dropbox %s"%(pdf, dropDir))
+    despdf = os.path.join(dropDir, pdf)
+    if file_exists(despdf):
+        base = despdf.rstrip(".pdf")
+        fsimi = glob(base+"*"+".pdf")
+        for i in xrange(10):
+            newpdf = base + "-" + str(i) + ".pdf"
+            if newpdf in fsimi :
+                continue
+            else :
+                shutil.copy(inpdf, newpdf)
+                break
+    else :
+        shutil.copy(inpdf, despdf)
 
 def do_latex(desdir, masterfile, use_pdflatex=False) :
     if use_pdflatex :
@@ -313,8 +343,18 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
         subst = kindlestr_apj+fontstr+r"\\begin{document}"+magnifystr
     elif classname == "mn2e" :
         subst = kindlestr_mn+fontstr+r"\\begin{document}"+magnifystr
+    elif classname == "elsarticle" :
+        subst = kindlestr_els+fontstr+r"\\begin{document}"+magnifystr
     else :
         subst = kindlestr+fontstr+r"\\begin{document}"+magnifystr
+    substituteAll(masterfile, p, subst)
+    # scale figures \includegraphics[width=xx]
+    p = re.compile(r"\\includegraphics\[width=[\d|\.|\w|\s]+\]")
+    subst = r"\includegraphics[width=1.0\\textwidth]"
+    substituteAll(masterfile, p, subst)
+    # switch names for bbl files \bibliography{ref_hshwang}
+    p = re.compile(r"\\bibliography{\S+}")
+    subst = r"\\bibliography{main}"
     substituteAll(masterfile, p, subst)
     # comment out banned package
     for pack in banned_packages :
@@ -326,6 +366,7 @@ def parse_documentclass(classname, classopts):
     col_set = "default"
     if (classname == "elsart_mm"  or classname == "aa" or
         classname == "emulateapj" or classname == "aastex" or 
+        classname == "elsarticle" or 
         classname == "mn2e"       or classname == "article") :
         print("Journal Name: %20s"%jname[classname])
         print("`one/twocolumn` option is available")
