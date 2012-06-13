@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rsync -vhzrplt --stats --delete /home/mitchell/yingzu/Dropbox/kindle_sync/ /media/Kindle/documents/sync/
+rsync -vhzrplt --stats --delete ~/Dropbox/kindle_sync/ /media/Kindle/documents/Incoming/
