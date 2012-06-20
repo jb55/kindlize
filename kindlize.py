@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 13 Jun 2012 03:32:17 AM
+#Last-modified: 17 Jun 2012 10:15:23 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -40,6 +40,7 @@ jname = { "elsart_mm" : "Elsevier Science",
           "mn2e"      : "MNRAS",
           "article"   : "Generic Article",
           "elsarticle": "Elsevier Science",
+          "revtex4"   : "Physics Review",
         }
 
 #banned_packages = ["hyperref", "emulateapj5"]
@@ -219,6 +220,11 @@ def getClass(classname, clsfiles, bstfiles, desdir):
             shutil.copy(os.path.join(clibDir, clsfile), desdir)
         else :
             raise KindleException("failed to find it in the cls library")
+    # extra files
+    if classname == "revtex4" :
+        shutil.copy(os.path.join(clibDir, "revsymb.sty"), desdir)
+        shutil.copy(os.path.join(clibDir, "aps.rtx.tex"), desdir)
+        shutil.copy(os.path.join(clibDir, "10pt.rtx.tex"), desdir)
     bstfile = ".".join([classname, "bst"])
     if classname == "emulateapj" :
         # just copy the apj.bst file
@@ -402,9 +408,9 @@ def parse_documentclass(classname, classopts):
     if classname == "old" :
         return("default", None, None)
     col_set = "default"
-    if (classname == "elsart_mm"  or classname == "aa" or
-        classname == "emulateapj" or classname == "aastex" or 
-        classname == "elsarticle" or 
+    if (classname == "elsart_mm"  or classname == "aa"      or
+        classname == "emulateapj" or classname == "aastex"  or 
+        classname == "elsarticle" or classname == "revtex4" or
         classname == "mn2e"       or classname == "article") :
         print("Journal Name: %20s"%jname[classname])
         print("`one/twocolumn` option is available")
