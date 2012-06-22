@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 21 Jun 2012 08:58:34 PM
+#Last-modified: 22 Jun 2012 01:24:28 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -396,7 +396,7 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
 #    subst = r"\includegraphics[width=1.0\\textwidth]"
 #    substituteAll(masterfile, p, subst)
     # scale figures, greedy fashion
-    p = re.compile(r"width=[\d|\.|\w|\s]+")
+    p = re.compile(r"[^a-zA-Z]width=[\d|\.]+[cm|in|inch]")
     subst = r"width=1.0\\textwidth"
     substituteAll(masterfile, p, subst)
 #    p = re.compile(r"\\begin{figure\*}")

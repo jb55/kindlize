@@ -1,4 +1,4 @@
-#Last-modified: 21 Jun 2012 09:35:27 PM
+#Last-modified: 22 Jun 2012 03:58:20 PM
 import json
 import os.path
 import hashlib
@@ -25,7 +25,7 @@ class Collection(object):
     def update(self, c, new_hal, fname):
         _c = " ".join([c, "-@en-US"]) 
         if _c in self.cnames :
-            if new_hal in self.cln[_c]["items"] :
+            if new_hal in self.cln[_c]["items"] or "*"+new_hal in self.cln[_c]["items"] :
                 pass
             else :
                 print("file %s does not exist in %s..."%(fname, _c))
@@ -95,13 +95,10 @@ class Collection(object):
         self.cnames = []
         self.forage(folder="")
 
-
-
-
 def gethash(fname):
     hin = os.path.join(HASH_PREFIX, fname)
-    hobj = hashlib.sha1(hin.encode('utf-8'))
-#    hobj = hashlib.sha1(hin)
+#    hobj = hashlib.sha1(hin.encode('utf-8'))
+    hobj = hashlib.sha1(hin)
     hval = hobj.hexdigest()
     return(hval)
 
@@ -110,6 +107,7 @@ def gethash(fname):
 
 if __name__ == "__main__":    
     cln = Collection()
-#    cln.forage(folder="Incoming")
-    cln.default()
+#    cln.forage(folder="Incoming/caustics")
+    cln.forage(folder="English")
+#    cln.default()
     cln.save()
