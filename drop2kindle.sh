@@ -1,3 +1,3 @@
 #!/bin/bash
 
-rsync -vhzrplt --stats --delete ~/Dropbox/kindle_sync/ /media/Kindle/documents/Incoming/
+rsync -av --delete --exclude "*.mbp" --exclude "*.pdr" ~/Dropbox/kindle_sync/ /media/Kindle/documents/Incoming/

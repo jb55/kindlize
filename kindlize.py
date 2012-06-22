@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 17 Jun 2012 10:15:23 PM
+#Last-modified: 21 Jun 2012 08:58:34 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -239,9 +239,9 @@ def getClass(classname, clsfiles, bstfiles, desdir):
 def getOpt(classoption):
     if classoption != "old" and classoption is not None :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
-        if len(classopts) == 0 :
+        if len(classopts) == 1 and classopts[0] == "" :
             print("empty class options")
-            hasoptbracket = True
+            hasoptbracket = False
         else :
             print(classopts)
             hasoptbracket = True
@@ -313,10 +313,9 @@ def batch_ps2eps(desdir, psfiles) :
     return(epsfiles)
 
    
-def dropit(inpdf) :
+def dropit(inpdf, where="") :
     pdf = os.path.basename(inpdf)
-    print("drop %s into dropbox %s"%(pdf, dropDir))
-    despdf = os.path.join(dropDir, pdf)
+    despdf = os.path.join(dropDir, where, pdf)
     if file_exists(despdf):
         base = despdf.rstrip(".pdf")
         fsimi = glob(base+"*"+".pdf")
@@ -326,9 +325,11 @@ def dropit(inpdf) :
                 continue
             else :
                 shutil.copy(inpdf, newpdf)
+                print("drop %s into dropbox  as %s"%(pdf, newpdf))
                 break
     else :
         shutil.copy(inpdf, despdf)
+        print("drop %s into dropbox  as %s"%(pdf, despdf))
 
 def do_latex(desdir, masterfile, use_pdflatex=False) :
     if use_pdflatex :
@@ -391,9 +392,19 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
         subst = kindlestr+fontstr+r"\\begin{document}"+magnifystr
     substituteAll(masterfile, p, subst)
     # scale figures \includegraphics[width=xx]
-    p = re.compile(r"\\includegraphics\[width=[\d|\.|\w|\s]+\]")
-    subst = r"\includegraphics[width=1.0\\textwidth]"
+#    p = re.compile(r"\\includegraphics\[width=[\d|\.|\w|\s]+\]")
+#    subst = r"\includegraphics[width=1.0\\textwidth]"
+#    substituteAll(masterfile, p, subst)
+    # scale figures, greedy fashion
+    p = re.compile(r"width=[\d|\.|\w|\s]+")
+    subst = r"width=1.0\\textwidth"
     substituteAll(masterfile, p, subst)
+#    p = re.compile(r"\\begin{figure\*}")
+#    subst = r"\\begin{figure}"
+#    substituteAll(masterfile, p, subst)
+#    p = re.compile(r"\\end{figure\*}")
+#    subst = r"\\end{figure}"
+#    substituteAll(masterfile, p, subst)
     # switch names for bbl files \bibliography{ref_hshwang}
     p = re.compile(r"\\bibliography{\S+}")
     subst = r"\\bibliography{main}"
@@ -431,7 +442,6 @@ def parse_documentclass(classname, classopts):
         print("`twocolumn` enabled")
     else :
         print("the existing file uses default column settting")
-
     return(col_set, onecol_arg, twocol_arg)
         
 
@@ -496,6 +506,8 @@ def parse_args():
       description="""Kindlize pdfs from astro-ph""")
     parser.add_argument('id',metavar='arxiv_id',
       help="arxiv identifier, such as 1008.0641")
+    parser.add_argument('where',metavar='subdir', default="",
+      help="subdirectory inside Dropbox sync dir")
     return(parser.parse_args())
 
 def getTar(arxivid):
@@ -531,18 +543,15 @@ def is_new(id):
 if __name__ == '__main__':
     args = parse_args()
     arxivid = args.id
+    where   = args.where
     fname, year  = getTar(arxivid)
     newpdf = unTarAndModify(fname, year)
     print(newpdf)
     if newpdf :
-        try :
-            os.system("evince "+newpdf)
-        except :
-            os.system("mupdf2 "+newpdf)
+        os.system("evince "+newpdf)
     else :
         raise RuntimeError("failed")
-    dropit(newpdf)
-
+    dropit(newpdf, where)
 
     
 
