@@ -1,4 +1,4 @@
-#Last-modified: 22 Jun 2012 03:58:20 PM
+#Last-modified: 18 Jul 2012 06:18:55 PM
 import json
 import os.path
 import hashlib
@@ -108,6 +108,7 @@ def gethash(fname):
 if __name__ == "__main__":    
     cln = Collection()
 #    cln.forage(folder="Incoming/caustics")
-    cln.forage(folder="English")
+    cln.forage(folder="Incoming/arxiv")
+#    cln.forage(folder="English")
 #    cln.default()
     cln.save()

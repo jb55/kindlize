@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 22 Jun 2012 01:24:28 PM
+#Last-modified: 12 Sep 2012 04:36:41 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -501,14 +501,28 @@ def commentALL(file, pattern):
     shutil.move(abs_path, file)
 
 def parse_args():
-    import argparse
-    parser = argparse.ArgumentParser(
-      description="""Kindlize pdfs from astro-ph""")
-    parser.add_argument('id',metavar='arxiv_id',
-      help="arxiv identifier, such as 1008.0641")
-    parser.add_argument('where',metavar='subdir', default="",
-      help="subdirectory inside Dropbox sync dir")
-    return(parser.parse_args())
+    try :
+        import argparse
+        hasargparse = True
+    except ImportError :
+        from optparse import OptionParser
+        hasargparse = False
+
+    if hasargparse :
+        parser = argparse.ArgumentParser(
+          description="""Kindlize pdfs from astro-ph""")
+        parser.add_argument('id',
+          metavar='arxiv_id', help="arxiv identifier, such as 1008.0641")
+        parser.add_argument('where',
+          metavar='subdir', default="", help="subdirectory inside Dropbox sync dir")
+        return(hasargparse, parser.parse_args())
+    else :
+        parser = OptionParser(usage="usage: %kindlize.py arxiv_id subdir")
+        options, args = parser.parse_args()
+        if len(args) != 2 :
+            raise RuntimeError("missing arguments.")
+        return(hasargparse, args)
+
 
 def getTar(arxivid):
     chkres = is_new(arxivid)
@@ -541,9 +555,14 @@ def is_new(id):
 
 
 if __name__ == '__main__':
-    args = parse_args()
-    arxivid = args.id
-    where   = args.where
+    ver, args = parse_args()
+    print args
+    if ver :
+        arxivid = args.id
+        where   = args.where
+    else :
+        arxivid  = args[0]
+        where    = args[1]
     fname, year  = getTar(arxivid)
     newpdf = unTarAndModify(fname, year)
     print(newpdf)
