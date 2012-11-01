@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 12 Sep 2012 04:36:41 PM
+#Last-modified: 31 Oct 2012 01:10:36 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -21,10 +21,10 @@ NEW_STYLE = re.compile(r'\d{4}\.\d{4}(v\d+)?$')
 OLD_STYLE = re.compile( r'(astro-ph)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
 
 # geometry configuration
-kindlestr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
-kindlestr_apj = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.3cm, left=1.5cm, right=0.0cm, bottom=-1.0cm]{geometry}\n"
-kindlestr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
-kindlestr_els = "\usepackage[paperwidth=15.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.3cm]{geometry}\n"
+geostr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
+geostr_apj = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.3cm, left=1.5cm, right=0.0cm, bottom=-1.0cm]{geometry}\n"
+geostr_mn  = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=2.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
+geostr_els = "\usepackage[paperwidth=15.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.3cm]{geometry}\n"
 
 # font name
 fontstr = "\usepackage{charter}\n"
@@ -50,7 +50,6 @@ old_files = ["aaspp4.sty", "psfig.sty", "flushrt.sty", "mn.cls"]
 
 class KindleException(Exception):
     pass
-
 
 def url2name(url):
     return(os.path.basename(urlsplit(url)[2]))
@@ -79,7 +78,7 @@ def download(url):
     return(absFileName)
 
 def findFigs(t, ext="ps"):
-    # find all the ps figure files
+    """ find all the figure files with specified extensions. """
     figfiles = []
     for file in t.getnames() :
         if file.endswith("."+ext) :
@@ -88,6 +87,8 @@ def findFigs(t, ext="ps"):
     return(figfiles)
 
 def force_mkdir(desdir):
+    """ clear out the desdir you want and remake the directory available.
+    """
     if os.path.exists(desdir):
         shutil.rmtree(desdir)
     else :
@@ -97,6 +98,8 @@ def force_mkdir(desdir):
             raise KindleException("mkdir %s failed, %s"%(desdir, err))
 
 def examine_texenv(desdir):
+    """ find tex file, cls file, bst file, and bbl file in the tar ball.
+    """
     texfiles = []
     clsfiles = []
     bstfiles = []
@@ -117,6 +120,8 @@ def examine_texenv(desdir):
     return(texfiles, clsfiles, bstfiles, bblfiles)
 
 def getMaster(texfiles, desdir):
+    """ copy master tex file to main.tex and determine whether latex2e or latex2.09 is needed.
+    """
     masterfile = None
     for texfile in texfiles :
         texfile = os.path.join(desdir, texfile)
@@ -138,7 +143,7 @@ def getMaster(texfiles, desdir):
     return(masterfile, texversion)
             
 def getBiblio(bblfiles, desdir):
-    # copy bbl if there is one and only one such file
+    """ copy bbl if there is one and only one such file """
     if len(bblfiles) == 1 :
         # make sure this works
         bblfile_old = os.path.join(desdir, bblfiles[0])
@@ -147,6 +152,8 @@ def getBiblio(bblfiles, desdir):
         shutil.copy(bblfile_old, bblfile_new)
 
 def checkMaster(masterfile, texversion) :
+    """ find document class and first author name
+    """
     if texversion == "latex2.09" :
         classname   = "old"
         classoption = "old"
@@ -169,6 +176,7 @@ def checkMaster(masterfile, texversion) :
     f = open(masterfile, "r")
     p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
     q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
+    # this need to be constantly improved.
     q_mn  = re.compile("[^\%]author\[([\w|\s|\.|\~|\\\\|\&]*)\]")
     q_els = re.compile("[^\%]author\[[\d|\,]*\]\{([\w|\s|\.|\~]+)\}")
     for line in f.readlines():
@@ -176,7 +184,6 @@ def checkMaster(masterfile, texversion) :
         if presult :
             classoption = presult.group(1)
             classname   = presult.group(2)
-        #
         if classname is None :
             qresult = None
         elif classname == "mn2e" :
@@ -210,6 +217,8 @@ def checkMaster(masterfile, texversion) :
     return(classoption, classname, author)
 
 def getClass(classname, clsfiles, bstfiles, desdir):
+    """ copy corresponding style files based on classname.
+    """
     if classname == "article" or classname == "old" :
         # safe
         return(None)
@@ -237,6 +246,8 @@ def getClass(classname, clsfiles, bstfiles, desdir):
                 print("probably the references will be messed up")
 
 def getOpt(classoption):
+    """ determine documentclass options for updating geometry and column info.
+    """
     if classoption != "old" and classoption is not None :
         classopts = classoption.lstrip("[").rstrip("]").split(",")
         if len(classopts) == 1 and classopts[0] == "" :
@@ -251,47 +262,9 @@ def getOpt(classoption):
         print("no class options")
     return(hasoptbracket, classopts)
 
-def unTarAndModify(filename, year):
-    try :
-        print('%20s  is a tar file? %s \n continue' % (filename, tarfile.is_tarfile(filename)))
-    except IOError, err :
-        print('%20s  is a tar file? %s \n exiting' % (filename, err))
-        return(None)
-    # desdir: intermediate directory to store files and recompile, should be
-    # non-existent otherwise will be wiped out the code
-    desdir = os.path.join(saveDir, "outdir")
-    force_mkdir(desdir)
-    # open the tar file
-    t = tarfile.open(filename, 'r')
-    pdffiles = findFigs(t, "pdf")
-    pngfiles = findFigs(t, "png")
-    if len(pdffiles) > 0 or len(pngfiles) > 0:
-        use_pdflatex = True
-    else :
-        use_pdflatex = False
-    t.extractall(desdir)
-    texfiles, clsfiles, bstfiles, bblfiles = examine_texenv(desdir)
-    # go through all files
-    masterfile, texversion = getMaster(texfiles, desdir)
-    # deal with old latex2.09 files
-    handleOldTeX(texversion, desdir)
-    getBiblio(bblfiles, desdir)
-    classoption, classname, author = checkMaster(masterfile, texversion)
-    getClass(classname, clsfiles, bstfiles, desdir)
-    hasoptbracket, classopts = getOpt(classoption)
-    # parse class
-    col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
-    # substitute
-    kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg)
-    # recompile
-    pdfout = do_latex(desdir, masterfile, use_pdflatex=use_pdflatex)
-    # rename
-    newpdfname = author + year + ".pdf"
-    newpdf = os.path.join(desdir, newpdfname)
-    shutil.move(pdfout, newpdf)
-    return(newpdf)
-
 def handleOldTeX(texversion, desdir) :
+    """ copy all the old style files so that the old TeX file can be compiled.
+    """
     if texversion == "latex2.09" :
         for file in old_files :
             fold = os.path.join(clibDir, file)
@@ -312,7 +285,6 @@ def batch_ps2eps(desdir, psfiles) :
         epsfiles.append(epsfile)
     return(epsfiles)
 
-   
 def dropit(inpdf, where="") :
     pdf = os.path.basename(inpdf)
     despdf = os.path.join(dropDir, where, pdf)
@@ -359,62 +331,6 @@ def file_exists(file):
     except :
         return(False)
 
-
-def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg):
-    if col_set == "one" :
-        pass
-    elif col_set == "two" :
-        if onecol_arg is not None :
-            replaceAll(masterfile, twocol_arg, onecol_arg)
-        else :
-            print("Nothing I can do about, stay with twocolumn")
-    elif col_set == "default" :
-        if onecol_arg is not None :
-            if hasoptbracket :
-                print("adding %s into brackets"%onecol_arg)
-                replaceAll(masterfile, "documentclass[", "documentclass["+onecol_arg+",")
-            else :
-                print("adding %s and brackets"%onecol_arg)
-                replaceAll(masterfile, "documentclass", "documentclass["+onecol_arg+"]")
-        else :
-            print("Nothing I can do about, stay with default, maybe you are lucky")
-    # add kindlestr 
-    p = re.compile(r"^\\begin{document}")
-    if classname == "emulateapj" :
-        subst = kindlestr_apj+fontstr+r"\\begin{document}"+magnifystr
-    elif classname == "mn2e" :
-        subst = kindlestr_mn+fontstr+r"\\begin{document}"+magnifystr
-    elif classname == "elsarticle" :
-        subst = kindlestr_els+fontstr+r"\\begin{document}"+magnifystr
-    elif classname == "old" :
-        subst = r"\\begin{document}"+magnifystr
-    else :
-        subst = kindlestr+fontstr+r"\\begin{document}"+magnifystr
-    substituteAll(masterfile, p, subst)
-    # scale figures \includegraphics[width=xx]
-#    p = re.compile(r"\\includegraphics\[width=[\d|\.|\w|\s]+\]")
-#    subst = r"\includegraphics[width=1.0\\textwidth]"
-#    substituteAll(masterfile, p, subst)
-    # scale figures, greedy fashion
-    p = re.compile(r"[^a-zA-Z]width=[\d|\.]+[cm|in|inch]")
-    subst = r"width=1.0\\textwidth"
-    substituteAll(masterfile, p, subst)
-#    p = re.compile(r"\\begin{figure\*}")
-#    subst = r"\\begin{figure}"
-#    substituteAll(masterfile, p, subst)
-#    p = re.compile(r"\\end{figure\*}")
-#    subst = r"\\end{figure}"
-#    substituteAll(masterfile, p, subst)
-    # switch names for bbl files \bibliography{ref_hshwang}
-    p = re.compile(r"\\bibliography{\S+}")
-    subst = r"\\bibliography{main}"
-    substituteAll(masterfile, p, subst)
-    # comment out banned package
-    for pack in banned_packages :
-        p = re.compile("[^\%]usepackage(.*)\{" + pack +"\}")
-        commentALL(masterfile, p)
-
-
 def parse_documentclass(classname, classopts):
     if classname == "old" :
         return("default", None, None)
@@ -444,7 +360,6 @@ def parse_documentclass(classname, classopts):
         print("the existing file uses default column settting")
     return(col_set, onecol_arg, twocol_arg)
         
-
 def substituteAll(file, pattern, subst):
     #Create temp file
     fh, abs_path = mkstemp()
@@ -523,7 +438,6 @@ def parse_args():
             raise RuntimeError("missing arguments.")
         return(hasargparse, args)
 
-
 def getTar(arxivid):
     chkres = is_new(arxivid)
     if chkres is True :
@@ -551,6 +465,113 @@ def is_new(id):
     else :
         return(None)
 
+def _main(filename, year):
+    """ the main procedure.
+    """
+    try :
+        print('%20s  is a tar file? %s \n continue' % (filename, tarfile.is_tarfile(filename)))
+    except IOError, err :
+        print('%20s  is a tar file? %s \n exiting' % (filename, err))
+        return(None)
+    # desdir: intermediate directory to store files and recompile, should be
+    # non-existent otherwise will be wiped out by the code
+    desdir = os.path.join(saveDir, "outdir")
+    force_mkdir(desdir)
+    # open the tar file
+    t = tarfile.open(filename, 'r')
+    pdffiles = findFigs(t, "pdf")
+    pngfiles = findFigs(t, "png")
+    # decide if pdflatex is needed based on whether pdf/png files are used.
+    if len(pdffiles) > 0 or len(pngfiles) > 0 :
+        use_pdflatex = True
+    else :
+        use_pdflatex = False
+    # extract content
+    t.extractall(desdir)
+    texfiles, clsfiles, bstfiles, bblfiles = examine_texenv(desdir)
+    # go through all files
+    masterfile, texversion = getMaster(texfiles, desdir)
+    # deal with old latex2.09 files
+    handleOldTeX(texversion, desdir)
+    # copy bbl files if there is one
+    getBiblio(bblfiles, desdir)
+    # examine documentclass and find author
+    classoption, classname, author = checkMaster(masterfile, texversion)
+    # copy style files
+    getClass(classname, clsfiles, bstfiles, desdir)
+    # find options of documentclass
+    hasoptbracket, classopts = getOpt(classoption)
+    # parse documentclass and options
+    col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
+    # heavy duty modification of the master TeX file
+    kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg)
+    # recompile
+    pdfout = do_latex(desdir, masterfile, use_pdflatex=use_pdflatex)
+    # rename
+    newpdfname = author + year + ".pdf"
+    newpdf = os.path.join(desdir, newpdfname)
+    shutil.move(pdfout, newpdf)
+    return(newpdf)
+
+def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg):
+    """ diagonose the master TeX file.
+    """
+    # make onecolumn pdf 
+    if col_set == "one" :
+        pass
+    elif col_set == "two" :
+        if onecol_arg is not None :
+            replaceAll(masterfile, twocol_arg, onecol_arg)
+        else :
+            print("Nothing I can do about, stay with twocolumn")
+    elif col_set == "default" :
+        if onecol_arg is not None :
+            if hasoptbracket :
+                print("adding %s into brackets"%onecol_arg)
+                replaceAll(masterfile, "documentclass[", "documentclass["+onecol_arg+",")
+            else :
+                print("adding %s and brackets"%onecol_arg)
+                replaceAll(masterfile, "documentclass", "documentclass["+onecol_arg+"]")
+        else :
+            print("Nothing I can do about, stay with default, maybe you are lucky")
+    # add geostr - to fit in the screen size of kindle DX
+    p = re.compile(r"^\\begin{document}")
+    if classname == "emulateapj" :
+        subst = geostr_apj+fontstr+r"\\begin{document}"+magnifystr
+    elif classname == "mn2e" :
+        subst = geostr_mn+fontstr+r"\\begin{document}"+magnifystr
+    elif classname == "elsarticle" :
+        subst = geostr_els+fontstr+r"\\begin{document}"+magnifystr
+    elif classname == "old" :
+        subst = r"\\begin{document}"+magnifystr
+    else :
+        subst = geostr+fontstr+r"\\begin{document}"+magnifystr
+    substituteAll(masterfile, p, subst)
+    # scale figures
+    # if \includegraphics[width=xx]
+    p = re.compile(r"\\includegraphics\[width=[\d|\.]+[cm|in|inch]+\]")
+    subst = r"\includegraphics[width=1.0\\textwidth]"
+    substituteAll(masterfile, p, subst)
+    # scale figures, greedy fashion, hardly works
+    # p = re.compile(r"[^a-zA-Z]width=[\d|\.]+[cm|in|inch]")
+    # subst = r"width=1.0\\textwidth"
+    # substituteAll(masterfile, p, subst)
+    # not necessary
+    # p = re.compile(r"\\begin{figure\*}")
+    # subst = r"\\begin{figure}"
+    # substituteAll(masterfile, p, subst)
+    # p = re.compile(r"\\end{figure\*}")
+    # subst = r"\\end{figure}"
+    # substituteAll(masterfile, p, subst)
+    # switch names for bbl files \bibliography{ref_hshwang}
+    # change bbl to be named `main`
+    p = re.compile(r"\\bibliography{\S+}")
+    subst = r"\\bibliography{main}"
+    substituteAll(masterfile, p, subst)
+    # comment out banned package
+    for pack in banned_packages :
+        p = re.compile("[^\%]usepackage(.*)\{" + pack +"\}")
+        commentALL(masterfile, p)
 
 
 
@@ -564,10 +585,10 @@ if __name__ == '__main__':
         arxivid  = args[0]
         where    = args[1]
     fname, year  = getTar(arxivid)
-    newpdf = unTarAndModify(fname, year)
+    newpdf = _main(fname, year)
     print(newpdf)
     if newpdf :
-        os.system("evince "+newpdf)
+        os.system("mupdf "+newpdf)
     else :
         raise RuntimeError("failed")
     dropit(newpdf, where)

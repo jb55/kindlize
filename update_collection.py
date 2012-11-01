@@ -1,4 +1,5 @@
-#Last-modified: 18 Jul 2012 06:18:55 PM
+#!/usr/bin/env python
+#Last-modified: 31 Oct 2012 01:14:04 AM
 import json
 import os.path
 import hashlib
@@ -101,9 +102,6 @@ def gethash(fname):
     hobj = hashlib.sha1(hin)
     hval = hobj.hexdigest()
     return(hval)
-
-
-
 
 if __name__ == "__main__":    
     cln = Collection()
