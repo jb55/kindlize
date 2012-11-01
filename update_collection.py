@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 31 Oct 2012 01:14:04 AM
+#Last-modified: 31 Oct 2012 11:03:51 PM
 import json
 import os.path
 import hashlib
@@ -10,11 +10,15 @@ ALLOWED_EXTENSIONS = ["pdf", "mobi", "azw", "txt", "prc"]
 
 class Collection(object):
     def __init__(self, root="/media/Kindle/"):
+        """ Initialize the Collection class, load the existing class.
+        """
         self.root = root
         # load the current collections
         self.load()
 
     def load(self):
+        """ load existing collection json file.
+        """
         fcln = os.path.join(self.root, "system", "collections.json")
         f    = file(fcln, "r")
         # json file
@@ -24,6 +28,8 @@ class Collection(object):
         f.close()
 
     def update(self, c, new_hal, fname):
+        """ update collection and new_hal to the database.
+        """
         _c = " ".join([c, "-@en-US"]) 
         if _c in self.cnames :
             if new_hal in self.cln[_c]["items"] or "*"+new_hal in self.cln[_c]["items"] :
@@ -41,7 +47,7 @@ class Collection(object):
             self.cnames  = self.cln.keys()
 
     def forage(self, folder="incoming"):
-        """ 
+        """ detect new files and merge them into data base.
         """
         if folder.startswith("/") :
             raise RuntimeError("folder needs to be a dir relative to <documents>")
@@ -72,14 +78,14 @@ class Collection(object):
                     # Calculate SHA1 hash for the /mnt/us/<folder>/<filename>
                     old_hal = gethash(os.path.join(folder, filename))
                     self.update(current_collection, old_hal, filename)
-
             # Check if is directory
             elif os.path.isdir(os.path.join(path, filename)):
                     # Parse this sub-directory recursively
                     self.forage(folder=os.path.join(folder, filename))
 
     def save(self, outdir=None) :
-        # Convert collections to JSON
+        """ Convert collections to JSON
+        """
         collections_json = json.dumps(self.cln)
         # Write JSON to a collections.json
         if outdir is None :
@@ -97,15 +103,15 @@ class Collection(object):
         self.forage(folder="")
 
 def gethash(fname):
+    """ get hash string.
+    """
     hin = os.path.join(HASH_PREFIX, fname)
-#    hobj = hashlib.sha1(hin.encode('utf-8'))
     hobj = hashlib.sha1(hin)
     hval = hobj.hexdigest()
     return(hval)
 
 if __name__ == "__main__":    
     cln = Collection()
-#    cln.forage(folder="Incoming/caustics")
     cln.forage(folder="Incoming/arxiv")
 #    cln.forage(folder="English")
 #    cln.default()
