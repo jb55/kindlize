@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 31 Oct 2012 01:10:36 AM
+#Last-modified: 02 Nov 2012 12:44:07 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -230,10 +230,12 @@ def getClass(classname, clsfiles, bstfiles, desdir):
         else :
             raise KindleException("failed to find it in the cls library")
     # extra files
-    if classname == "revtex4" :
+    if classname == "revtex4" or classname == "emulateapj" :
         shutil.copy(os.path.join(clibDir, "revsymb.sty"), desdir)
         shutil.copy(os.path.join(clibDir, "aps.rtx.tex"), desdir)
         shutil.copy(os.path.join(clibDir, "10pt.rtx.tex"), desdir)
+        shutil.copy(os.path.join(clibDir, "revtex4.cls"), desdir)
+        shutil.copy(os.path.join(clibDir, "epsf.sty"), desdir)
     bstfile = ".".join([classname, "bst"])
     if classname == "emulateapj" :
         # just copy the apj.bst file
