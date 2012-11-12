@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 02 Nov 2012 12:44:07 AM
+#Last-modified: 11 Nov 2012 09:01:13 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -165,7 +165,10 @@ def checkMaster(masterfile, texversion) :
                 firstauthor = qresult.group(1)
                 break
         if qresult : 
-            author = firstauthor.split()[-1]
+            try :
+                author = firstauthor.split()[-1]
+            except IndexError :
+                author = "unknown"
         else :
             author = "unknown"
         f.close()
@@ -236,6 +239,7 @@ def getClass(classname, clsfiles, bstfiles, desdir):
         shutil.copy(os.path.join(clibDir, "10pt.rtx.tex"), desdir)
         shutil.copy(os.path.join(clibDir, "revtex4.cls"), desdir)
         shutil.copy(os.path.join(clibDir, "epsf.sty"), desdir)
+        shutil.copy(os.path.join(clibDir, "apjfonts.sty"), desdir)
     bstfile = ".".join([classname, "bst"])
     if classname == "emulateapj" :
         # just copy the apj.bst file
