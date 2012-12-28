@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 11 Nov 2012 09:01:13 PM
+#Last-modified: 27 Dec 2012 10:36:51 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -240,6 +240,9 @@ def getClass(classname, clsfiles, bstfiles, desdir):
         shutil.copy(os.path.join(clibDir, "revtex4.cls"), desdir)
         shutil.copy(os.path.join(clibDir, "epsf.sty"), desdir)
         shutil.copy(os.path.join(clibDir, "apjfonts.sty"), desdir)
+        shutil.copy(os.path.join(clibDir, "rmp.rtx"), desdir)
+    if classname == "elsarticle" :
+        shutil.copy(os.path.join(clibDir, "epsf.tex"), desdir)
     bstfile = ".".join([classname, "bst"])
     if classname == "emulateapj" :
         # just copy the apj.bst file
