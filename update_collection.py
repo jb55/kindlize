@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 31 Oct 2012 11:03:51 PM
+#Last-modified: 27 Dec 2012 11:52:57 PM
 import json
 import os.path
 import hashlib
@@ -113,6 +113,5 @@ def gethash(fname):
 if __name__ == "__main__":    
     cln = Collection()
     cln.forage(folder="Incoming/arxiv")
-#    cln.forage(folder="English")
 #    cln.default()
     cln.save()
