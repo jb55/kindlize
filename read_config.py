@@ -2,6 +2,9 @@ import os
 from ConfigParser import RawConfigParser
 
 
+""" Read basic configurations from ~/.kindle.cfg file.
+"""
+
 
 class Config(object):
     def __init__(self, items):
@@ -9,12 +12,14 @@ class Config(object):
     @classmethod
     def from_raw_config(cls, config):
         return cls({
-            'kindleaddress' : config.get('general', 'kindleaddress'),
-            'logpath'       : config.get('general', 'logpath'),
-            'username'      : config.get('email', 'username'),
-            'server'        : config.get('email', 'server'),
-            'port'          : config.getint('email', 'port'),
-            'mode'          : config.get('email', 'mode'),
+            'device'      : config.get('general', 'device'),
+            'installDir'  : config.get('directory', 'installDir'),
+            'tmpDir'      : config.get('directory', 'tmpDir'),
+            'dropDir'     : config.get('directory', 'dropDir'),
+            'incomingDir' : config.get('directory', 'incomingDir'),
+            'font'        : config.get('LaTeX', 'font'),
+            'fontheight'  : config.get('LaTeX', 'fontheight'),
+            'fontwidth'   : config.get('LaTeX', 'fontwidth'),
         })
 
     def __getattr__(self, key):
@@ -26,17 +31,7 @@ class Config(object):
     def __repr__(self):
         return '%s(%r)' % (self.__class__.__name__, self._items)
 
-
 def load_config():
     config = RawConfigParser()
     config.read(os.path.expanduser('~/.kindle.cfg'))
-    return Config.from_raw_config(config)
-
-def main():
-    config = load_config()
-
-    print config.username
-
-if __name__ == '__main__':
-    main()
-
+    return(Config.from_raw_config(config))
