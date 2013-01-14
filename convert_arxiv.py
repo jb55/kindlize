@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 14 Jan 2013 02:11:11 AM
+#Last-modified: 14 Jan 2013 12:51:35 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -284,7 +284,7 @@ def batch_ps2eps(desdir, psfiles) :
         epsfiles.append(epsfile)
     return(epsfiles)
 
-def dropit(inpdf, where="") :
+def dropit(inpdf, dropDir, where="") :
     pdf = os.path.basename(inpdf)
     despdf = os.path.join(dropDir, where, pdf)
     if file_exists(despdf):
@@ -491,6 +491,7 @@ def convert(filename, year, saveDir, origDir, clibDir, dropDir, font, fontheight
     newpdfname = author + year + ".pdf"
     newpdf = os.path.join(desdir, newpdfname)
     shutil.move(pdfout, newpdf)
+    print("generated pdf file: %s " % newpdf)
     return(newpdf)
 
 def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg, fontstr, magnifystr):
@@ -553,6 +554,24 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
         p = re.compile("[^\%]usepackage(.*)\{" + pack +"\}")
         commentALL(masterfile, p)
 
+def correct_unknown_author(pdffile) :
+    """ ask input from commandline the true author name if the code cannot figure out.
+    """
+
+    if "unknown" in pdffile :
+        true_author = ""
+        while(true_author == ""):
+            true_author = raw_input("The author name is obsure from the TeX file, please input the last name of the first author and press Enter.\n")
+            if true_author == "" :
+                print("Illegal input, author name can not be blank.")
+            else :
+                break
+        newpdffile = pdffile.replace("unknown", true_author)
+        shutil.move(pdffile, newpdffile)
+        print("Corrected the pdf file name to %s" % newpdffile)
+    else :
+        newpdffile = pdffile
+    return(newpdffile)
 
 if __name__ == '__main__':
     ver, args = parse_args()

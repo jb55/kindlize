@@ -20,6 +20,7 @@ class Config(object):
             'font'        : config.get('LaTeX', 'font'),
             'fontheight'  : config.get('LaTeX', 'fontheight'),
             'fontwidth'   : config.get('LaTeX', 'fontwidth'),
+            'pdfviewer'   : config.get('pdf',   'pdfviewer'),
         })
 
     def __getattr__(self, key):

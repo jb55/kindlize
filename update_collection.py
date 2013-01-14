@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#Last-modified: 27 Dec 2012 11:52:57 PM
+#Last-modified: 14 Jan 2013 02:04:05 PM
 import json
 import os.path
 import hashlib
@@ -46,7 +46,7 @@ class Collection(object):
             self.cln[_c] = new_collection
             self.cnames  = self.cln.keys()
 
-    def forage(self, folder="incoming"):
+    def forage(self, folder="Incoming"):
         """ detect new files and merge them into data base.
         """
         if folder.startswith("/") :
