@@ -10,3 +10,7 @@ syntax: glob
 *.ori
 *.orig
 *.mod
+dist/**
+build/**
+kindlize.egg-info/**
+

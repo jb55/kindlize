@@ -1,12 +1,13 @@
 #!/usr/bin/env python
-# Last-modified: 14 Jan 2013 02:23:07 PM
+# Last-modified: 15 Jan 2013 12:14:10 AM
 
 import os.path
+import pkgutil
 import re
-from convert_arxiv import getTar, convert, correct_unknown_author, dropit
-from read_config import load_config
 from subprocess import Popen, PIPE
-from update_collection import Collection
+from kindlize_src.convert_arxiv import getTar, convert, correct_unknown_author, dropit
+from kindlize_src.read_config import load_config
+from kindlize_src.update_collection import Collection
 
 def parse_args(dropDir):
     """ Parsing command-line arguments, compatible with both
@@ -23,9 +24,9 @@ def parse_args(dropDir):
         parser = argparse.ArgumentParser(
           description="""Kindlize pdfs from arXiv""")
         parser.add_argument('id',
-          metavar='arxiv_id', default="0", help="arXiv identifier, such as 1008.0641.")
+          metavar='arxiv_id', nargs='?', default="0", help="arXiv identifier, such as 1008.0641.")
         parser.add_argument('where',
-          metavar='subdir', default=".", help=" ".join(["which subdir under", dropDir, "to drop the final pdf."]))
+          metavar='subdir', nargs='?', default=".", help=" ".join(["which subdir under", dropDir, "to drop the final pdf."]))
         arxivid = parser.parse_args().id
         where   = parser.parse_args().where
     else :
@@ -53,6 +54,7 @@ def detect_kindle(incomingDir):
         return(True)
     else :
         print("%s does not exist, Kindle seems to be disconnected." % incomingDir)
+        print("usage: kindlize [-h] [arxiv_id] [subdir]")
         return(False)
 
 def sync_kindle_folder(dropDir, incomingDir) :
@@ -62,17 +64,19 @@ def sync_kindle_folder(dropDir, incomingDir) :
     print(Popen(" ".join(["rsync", "-av", "--delete", "--exclude", "*.mbp", "--exclude", "*.pdr", dropDir, incomingDir]), stdout=PIPE, shell=True).stdout.read())
 
 
-def main():
-    config = load_config()
+def _main():
+    config  = load_config()
+    origDir = os.path.dirname(os.path.realpath(__file__))
     # expand HOME variable to get full directories.
     saveDir     = os.path.expanduser(config.tmpDir)
-    origDir     = os.path.expanduser(config.installDir)
-    clibDir     = os.path.expanduser(os.path.join(origDir, "clslib"))
+    clibDir     = os.path.expanduser(os.path.join(origDir, 
+        "kindlize_src", "clslib"))
     dropDir     = os.path.expanduser(config.dropDir)
     incomingDir = os.path.expanduser(config.incomingDir)
     # get the relative path of incomingDir under document/
     result = re.search('Kindle/documents/(.*)', incomingDir)
     subDir = result.group(1)
+    # print("Please make sure subdir %s exists in your Kindle" % subDir)
     # read commandline arguments.
     arxivid, where = parse_args(config.dropDir)
     # do pdf conversion when arxvid is nonzero.
@@ -80,7 +84,7 @@ def main():
         # download and save the tar file to saveDir, alse derive the year of publication.
         fname, year = getTar(arxivid, saveDir)
         # unpack and produce the kindle-friendly pdf file.
-        _newpdf = convert(fname, year, saveDir, origDir, clibDir, dropDir, config.font, config.fontheight, config.fontwidth)
+        _newpdf = convert(fname, year, saveDir, clibDir, dropDir, config.font, config.fontheight, config.fontwidth)
         newpdf  = correct_unknown_author(_newpdf)
         # preview the file
         preview_pdf(newpdf, config.pdfviewer)
@@ -106,4 +110,4 @@ def main():
 
 
 if __name__ == '__main__' :
-    main()
+    _main()

@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-#Last-modified: 14 Jan 2013 12:51:35 PM
+#Last-modified: 15 Jan 2013 12:03:10 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -269,21 +268,6 @@ def handleOldTeX(texversion, desdir) :
             fold = os.path.join(clibDir, file)
             shutil.copy(fold, desdir)
 
-def batch_ps2eps(desdir, psfiles) :
-    """ convert ps into eps"""
-    if len(psfiles) == 0 :
-        return([])
-    epsfiles = []
-    for psfile in psfiles :
-        epsfile = psfile.replace(".ps", ".eps")
-        cmd = " ".join(["ps2eps", os.path.join(desdir, psfile), os.path.join(desdir, epsfile)])
-        print(cmd)
-        os.system(cmd)
-        fixeps = " ".join([os.path.join(origDir, "fixbbox.sh"), os.path.join(desdir, epsfile)])
-        os.system(fixeps)
-        epsfiles.append(epsfile)
-    return(epsfiles)
-
 def dropit(inpdf, dropDir, where="") :
     pdf = os.path.basename(inpdf)
     despdf = os.path.join(dropDir, where, pdf)
@@ -302,11 +286,11 @@ def dropit(inpdf, dropDir, where="") :
         shutil.copy(inpdf, despdf)
         print("drop %s into dropbox  as %s"%(pdf, despdf))
 
-def do_latex(origDir, desdir, masterfile, use_pdflatex=False) :
+def do_latex(clibDir, desdir, masterfile, use_pdflatex=False) :
     if use_pdflatex :
-        mkfile = os.path.join(origDir, "Makefile_pdflatex")
+        mkfile = os.path.join(clibDir, "Makefile_pdflatex")
     else :
-        mkfile = os.path.join(origDir, "Makefile_latex")
+        mkfile = os.path.join(clibDir, "Makefile_latex")
     shutil.copy(mkfile, os.path.join(desdir, "Makefile"))
     cwd = os.getcwd() # get current directory
     os.chdir(desdir)
@@ -441,7 +425,7 @@ def is_new(id):
     else :
         return(None)
 
-def convert(filename, year, saveDir, origDir, clibDir, dropDir, font, fontheight, fontwidth):
+def convert(filename, year, saveDir, clibDir, dropDir, font, fontheight, fontwidth):
     """ the main procedure.
     """
     # font name
@@ -486,7 +470,7 @@ def convert(filename, year, saveDir, origDir, clibDir, dropDir, font, fontheight
     # heavy duty modification of the master TeX file
     kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg, fontstr, magnifystr)
     # recompile
-    pdfout = do_latex(origDir, desdir, masterfile, use_pdflatex=use_pdflatex)
+    pdfout = do_latex(clibDir, desdir, masterfile, use_pdflatex=use_pdflatex)
     # rename
     newpdfname = author + year + ".pdf"
     newpdf = os.path.join(desdir, newpdfname)
@@ -572,25 +556,3 @@ def correct_unknown_author(pdffile) :
     else :
         newpdffile = pdffile
     return(newpdffile)
-
-if __name__ == '__main__':
-    ver, args = parse_args()
-    print args
-    if ver :
-        arxivid = args.id
-        where   = args.where
-    else :
-        arxivid  = args[0]
-        where    = args[1]
-    fname, year  = getTar(arxivid)
-    newpdf = _main(fname, year)
-    print(newpdf)
-    if newpdf :
-        os.system("mupdf "+newpdf)
-    else :
-        raise RuntimeError("failed")
-    dropit(newpdf, where)
-
-    
-
-

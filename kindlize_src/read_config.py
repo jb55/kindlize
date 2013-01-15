@@ -13,7 +13,6 @@ class Config(object):
     def from_raw_config(cls, config):
         return cls({
             'device'      : config.get('general', 'device'),
-            'installDir'  : config.get('directory', 'installDir'),
             'tmpDir'      : config.get('directory', 'tmpDir'),
             'dropDir'     : config.get('directory', 'dropDir'),
             'incomingDir' : config.get('directory', 'incomingDir'),
