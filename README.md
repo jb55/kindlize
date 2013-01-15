@@ -111,7 +111,7 @@ source package and copy it to your local home directory.
 
 The required items are
 
-## general
+## [general]
 
 ### device=Kindle DX
 
@@ -120,7 +120,7 @@ are too small for serious journal reading. But if you want to give it a shot,
 please let me know (I don't personally own other Kindles, so I may need your
 help on tests).
 
-## directory
+## [directory]
 
 ### tmpDir=~/tmp
 
@@ -129,15 +129,15 @@ Determines where the TeX file will be unpacked and compiled into pdfs.
 ### dropDir=~/Dropbox/kindle_sync/
 
 Determines where on your local directory you want to store a backup of your
-Kindle arixv-related directory.
+Kindlized pdfs.
 
 ### incomingDir=/media/Kindle/documents/Incoming/
 
 Tells Kindlize where your Kindle content will show up in your file system
 and which subdirectory should you store the arXiv files. `incomingDir`
-will always be synced to the `dropDir`.
+will always be synced to `dropDir`.
 
-## LaTeX
+## [LaTeX]
 
 ### font=charter
 
@@ -153,7 +153,9 @@ Determines the height of your fonts.
 
 Determines the baseline of your fonts.
 
-## pdfviewer
+## [pdf]
+
+### pdfviewer
 
 Determines which pdf viewer to preview the generated pdfs.
 
