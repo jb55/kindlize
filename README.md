@@ -20,7 +20,7 @@ Screenshots
 
 ### Before
 
-![Screenshot](Screenshots/figpage_before.png)
+![Screenshot](screenshots/figpage_before.png)
 
 
 
