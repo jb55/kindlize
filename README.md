@@ -2,11 +2,15 @@
 Kindlize
 ========
 
-A color scheme for Vim, pieced together by [Steve Losh](http://stevelosh.com/).
+If you happen to own a [Kindle
+DX](http://www.amazon.com/Kindle-DX-Wireless-Reader-3G-Global/dp/B002GYWHSQ)
+device, and happen to be an avid [arXiv](http://arxiv.org/) reader, *Kindlize*
+helps you to make the most out of your e-ink reader for journal articles
+posted everyday on arXiv.
 
-There's still quite a lot of room for improvement (particularly in HTML) so feel
-free to send me ideas through the [issue tracker][] or pull requests.
 
+
+Feel free to send me ideas through the [issue tracker][] or pull requests.
 
 [issue tracker]: http://github.com/nye17/kindlize/issues
 
@@ -16,11 +20,8 @@ Screenshots
 
 ### Before
 
-![Screenshot](http://i.imgur.com/fQGGC.png)
+![Screenshot](Screenshots/figpage_before.png)
 
-### After
-
-![Screenshot](http://i.imgur.com/LgLar.png)
 
 
 Configuration
