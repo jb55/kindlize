@@ -2,17 +2,18 @@
 Kindlize
 ========
 
+Tired and/or guilty of printing out arXiv pre-prints everyday? Frustrated by
+the experience of reading two-column journal articles on your e-reader?
+
 If you happen to own a [Kindle
 DX](http://www.amazon.com/Kindle-DX-Wireless-Reader-3G-Global/dp/B002GYWHSQ)
-device, and happen to be an avid [arXiv](http://arxiv.org/) reader, *Kindlize*
-helps you to make the most out of your e-ink reader for journal articles
-posted everyday on arXiv.
+device, and happen to be an avid [arXiv](http://arxiv.org/) reader, Kindlize
+will make reading arXiv pre-prints on e-ink screen as pleasant as on A4 papers!
 
+The idea is simple. arXiv usually keeps the LaTeX source file of uploaded
+manuscripts, and Kindlize will reformat and recompile those LaTeX files so
+that the new pdf file is Kindlie-friendly.
 
-
-Feel free to send me ideas through the [issue tracker][] or pull requests.
-
-[issue tracker]: http://github.com/nye17/kindlize/issues
 
 Screenshots
 -----------
@@ -58,4 +59,6 @@ Tells Kindlize where your Kindle content will show up in your file system and wh
 Contributing
 ------------
 
-Please, report bugs and issues as I won't be able to cover all the TeX formats on arXiv!
+Please, report bugs and issues as I won't be able to cover all the TeX formats on arXiv. Feel free to send me ideas through the [issue tracker][] or pull requests!
+
+[issue tracker]: http://github.com/nye17/kindlize/issues
