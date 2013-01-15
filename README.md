@@ -49,7 +49,18 @@ Requirements
 Installation
 ------------
 
+If you have [mercurial](http://mercurial.selenic.com) installed, clone
+the source
+
     hg clone ssh://hg@bitbucket.org/nye17/kindlize 
+
+otherwise you can download tarball from
+[here](https://bitbucket.org/nye17/kindlize/downloads), then
+    
+    tar zxvf kindlize-0.0.1.tar.gz
+    
+To install,
+
     cd kindlize
     python setup.py install
 
