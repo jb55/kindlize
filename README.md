@@ -61,12 +61,18 @@ or if you want to install to a specified directory `INSTALLDIR`
 Workflow
 --------
 
-It is useful to explain the most common workflow using Kindlie. There are three major goals we want to achieve to establish a hassle-free reading experience:
+It is useful to explain the most common workflow using Kindlize. There are three major goals we want to achieve to establish a hassle-free reading experience:
 
 * Converting the tarball downloaded from arXiv into Kindle-friendly pdf.
 * Maintaining a local directory of "kindlized" pdfs among multiple computers.
 * Synchronizing the Kindle arXiv content to the local directory. 
 
+Kindlize is designed to take care of all three goals with some help from
+Dropbox. To kindlize an arXiv article, simply do
+
+    kindlize 1211.1379 astrocoffee
+
+where [`1211.1379`](http://arxiv.org/abs/1211.1379) is the arXiv identifier for the paper you want to read, and `astrocoffee` is the name of the directory
 
 Configuration
 -------------
