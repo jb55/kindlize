@@ -172,4 +172,4 @@ Contributing
 
 Please, report bugs and issues as I won't be able to cover all the TeX formats on arXiv. Feel free to send me ideas through the [issue tracker][] or pull requests!
 
-[issue tracker]: http://github.com/nye17/kindlize/issues
+[issue tracker]: http://bitbucket.org/nye17/kindlize/issues
