@@ -20,20 +20,20 @@ Screenshots
 
 ### Before (pure text and equations)
 
-![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png)
+![http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before_small_framed.png)
 
 ### After (pure text and equations)
 
-![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_after.png)
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_after_small_framed.png)
 
 
 ### Before (with Figure)
 
-![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_before.png)
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_before_small_framed.png)
 
 ### After (with Figure)
 
-![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_after.png)
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_after_small_framed.png)
 
 
 
