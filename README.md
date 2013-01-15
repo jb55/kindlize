@@ -20,7 +20,7 @@ Screenshots
 
 ### Before (pure text and equations)
 
-[![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before_small_framed.png)](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png)
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before_small_framed.png)
 
 
 ### After (pure text and equations)
@@ -36,6 +36,35 @@ Screenshots
 
 ![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_after_small_framed.png)
 
+
+Requirements
+------------
+
+* python2.7
+* a LaTeX environment
+* rsync
+
+
+Installation
+------------
+
+    hg clone ssh://hg@bitbucket.org/nye17/kindlize 
+    cd kindlize
+    python setup.py install
+
+or if you want to install to a specified directory `INSTALLDIR`
+
+    python setup.py install --prefix=INSTALLDIR
+
+
+Workflow
+--------
+
+It is useful to explain the most common workflow using Kindlie. There are three major goals we want to achieve to establish a hassle-free reading experience:
+
+* Converting the tarball downloaded from arXiv into Kindle-friendly pdf.
+* Maintaining a local directory of "kindlized" pdfs among multiple computers.
+* Synchronizing the Kindle arXiv content to the local directory. 
 
 
 Configuration
