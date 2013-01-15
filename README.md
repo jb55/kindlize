@@ -98,6 +98,14 @@ up in the `incoming - astrocoffee` collection, however, you have to reboot
 your Kindle to see it in action.
 
 
+You can always type
+
+    kindlize -h
+
+for help.
+
+
+
 
 Configuration
 -------------
