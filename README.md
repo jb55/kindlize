@@ -20,7 +20,7 @@ Screenshots
 
 ### Before
 
-![Screenshot](screenshots/figpage_before.png)
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_before.png)
 
 
 
