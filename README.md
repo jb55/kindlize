@@ -43,6 +43,7 @@ Requirements
 * python2.7
 * a LaTeX environment
 * rsync
+* [Dropbox](http://db.tt/i5xwlaj9) (suggested)
 
 
 Installation
@@ -62,9 +63,9 @@ Workflow
 
 It is useful to explain the most common workflow using Kindlie. There are three major goals we want to achieve to establish a hassle-free reading experience:
 
-- Converting the tarball downloaded from arXiv into Kindle-friendly pdf.
-- Maintaining a local directory of "kindlized" pdfs among multiple computers.
-- Synchronizing the Kindle arXiv content to the local directory. 
+* Converting the tarball downloaded from arXiv into Kindle-friendly pdf.
+* Maintaining a local directory of "kindlized" pdfs among multiple computers.
+* Synchronizing the Kindle arXiv content to the local directory. 
 
 
 Configuration
