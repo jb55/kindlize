@@ -17,10 +17,22 @@ Feel free to send me ideas through the [issue tracker][] or pull requests.
 Screenshots
 -----------
 
+### Before (pure text and equations)
 
-### Before
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png)
+
+### After (pure text and equations)
+
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_after.png)
+
+
+### Before (with Figure)
 
 ![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_before.png)
+
+### After (with Figure)
+
+![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/figpage_after.png)
 
 
 
