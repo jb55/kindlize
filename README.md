@@ -20,7 +20,8 @@ Screenshots
 
 ### Before (pure text and equations)
 
-![http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before_small_framed.png)
+[![Screenshot](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before_small_framed.png)](http://bitbucket.org/nye17/kindlize/raw/default/screenshots/textpage_before.png)
+
 
 ### After (pure text and equations)
 
