@@ -14,6 +14,10 @@ The idea is simple. arXiv usually keeps the LaTeX source file of uploaded
 manuscripts, and Kindlize will reformat and recompile those LaTeX files so
 that the new pdf file is Kindle-friendly.
 
+## CAVEAT
+
+Currently Kindlize only works with `astro-ph` posts on arXiv, but it ould be easily adapted to other fields by adding related journal LaTeX style files. Let me know if you want to work on implementing Kindlize for fields outside of Astrophysics.
+
 
 Screenshots
 -----------
