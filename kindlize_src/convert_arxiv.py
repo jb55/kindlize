@@ -1,4 +1,4 @@
-#Last-modified: 15 Jan 2013 12:03:10 AM
+#Last-modified: 15 Jan 2013 08:42:58 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -545,7 +545,7 @@ def correct_unknown_author(pdffile) :
     if "unknown" in pdffile :
         true_author = ""
         while(true_author == ""):
-            true_author = raw_input("The author name is obsure from the TeX file, please input the last name of the first author and press Enter.\n")
+            true_author = raw_input("The author name is obscure from the TeX file, please input the last name of the first author and press Enter.\n")
             if true_author == "" :
                 print("Illegal input, author name can not be blank.")
             else :
