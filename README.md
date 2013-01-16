@@ -14,10 +14,12 @@ The idea is simple. arXiv usually keeps the LaTeX source file of uploaded
 manuscripts, and Kindlize will reformat and recompile those LaTeX files so
 that the new pdf file is Kindle-friendly.
 
-CAVEAT
-------
+_CAVEAT_
 
-Currently Kindlize only works with `astro-ph` posts on arXiv, but it ould be easily adapted to other fields by adding related journal LaTeX style files. Let me know if you want to work on implementing Kindlize for fields outside of Astrophysics.
+Currently Kindlize only works with `astro-ph` posts on arXiv, but it could
+be easily adapted to other fields by adding related journal LaTeX style
+files. Let me know if you want to work on implementing Kindlize for fields
+outside of Astrophysics.
 
 
 Screenshots
@@ -77,49 +79,17 @@ or if you want to install to a specified directory `INSTALLDIR`
 Workflow
 --------
 
-It is useful to explain the most common workflow using Kindlize. There are three major goals we want to achieve to establish a hassle-free reading experience:
+It is useful to explain the most common workflow using Kindlize. There are
+three major goals we want to achieve to establish a hassle-free reading
+experience:
 
 * Converting the tarball downloaded from arXiv into Kindle-friendly pdf.
 * Maintaining a local directory of "kindlized" pdfs among multiple computers.
 * Synchronizing the Kindle arXiv content to the local directory. 
 
 Kindlize is designed to take care of all three goals with some help from
-Dropbox. To kindlize an arXiv article, simply do
-
-    kindlize 1211.1379 astrocoffee
-
-where [`1211.1379`](http://arxiv.org/abs/1211.1379) is the arXiv identifier for
-the paper you want to read, and `astrocoffee` is the name of the directory
-you want to keep this file under your filesystem. In particular, I have
-created a local directory  `~/Dropbox/kindle_sync/` for storing kindlized
-pdfs, and this pdf (turns out to be, accidentally, `Zu12.pdf`) will go into
-`~/Dropbox/kindle_sync/astrocoffee` directory. I will talk more about the
-filesystem in the next section.
-
-The above command will also enable you to preview the kindlized pdf using
-your favorite pdfviewer, and save a copy to your local arXiv directory.
-
-I have created a new directory under Kindle `documents/incoming/` to
-synchronize to the `~/Dropbox/kindle_sync/` directory on my computer. To
-synchronize, simply plug in your Kindle and make sure that the Kindle
-filesystem is accessible, then run
-
-    kindlize
-
-without arguments. This will force the Kindle directory to be exactly the
-same as your local directory (i.e., files could be either added or deleted
-from your Kindle!). This command will also send the newly added pdfs to the
-right `collection` on your Kindle. For example, `Zu12.pdf` file will show
-up in the `incoming - astrocoffee` collection, however, you have to reboot
-your Kindle to see it in action.
-
-
-You can always type
-
-    kindlize -h
-
-for help.
-
+Dropbox (simply by storing your local copy of kindlized pdfs inside your
+Dropbox directory).
 
 
 
@@ -158,8 +128,9 @@ Kindlized pdfs.
 ### incomingDir=/media/Kindle/documents/Incoming/
 
 Tells Kindlize where your Kindle content will show up in your file system
-and which subdirectory should you store the arXiv files. `incomingDir`
-will always be synced to `dropDir`.
+(i.e., the `/media/Kindle` part) and which subdirectory you want to store
+the arXiv files (i.e., the `documents/Incoming` part). `incomingDir` will
+always be synced to `dropDir`.
 
 ## [LaTeX]
 
@@ -179,13 +150,57 @@ Determines the baseline of your fonts.
 
 ## [pdf]
 
-### pdfviewer
+### pdfviewer=mupdf
 
-Determines which pdf viewer to preview the generated pdfs.
+Determines which pdf viewer to preview the generated pdfs. `mupdf` is
+strongly recommended.
+ 
+
+Useage
+------
+
+To kindlize an arXiv article, simply do
+
+    kindlize 1211.1379 astrocoffee
+
+where [`1211.1379`](http://arxiv.org/abs/1211.1379) is the arXiv identifier
+for the paper you want to read, and `astrocoffee` is the name of the directory
+you want to keep this file under your `dropDir` and `incomingDir`. As shown
+by `example.cfg`, I have created a local directory  `~/Dropbox/kindle_sync/`
+for storing kindlized pdfs, and this pdf (turns out to be, _accidentally_,
+`Zu12.pdf`) will go into `~/Dropbox/kindle_sync/astrocoffee` directory.
+
+The above command will also enable you to preview the kindlized pdf using
+your favorite `pdfviewer`.
+
+I have also created a new directory under Kindle `documents/incoming/` to
+synchronize to the `~/Dropbox/kindle_sync/` directory on my computer. To
+synchronize, simply plug in your Kindle and make sure that the Kindle
+filesystem is accessible, then run
+
+    kindlize
+
+without arguments. This will force the Kindle `incomingDir` directory to
+be exactly the same as your local `dropDir` directory (i.e., files could
+be either added or deleted from your Kindle!). This command will also send
+the newly added pdfs to the right `collection` on your Kindle. For example,
+`Zu12.pdf` file will show up in the `incoming - astrocoffee` collection,
+however, you have to reboot your Kindle to see it in action.
+
+
+You can always type
+
+    kindlize -h
+
+for help.
+
+
 
 Contributing
 ------------
 
-Please, report bugs and issues as I won't be able to cover all the TeX formats on arXiv. Feel free to send me ideas through the [issue tracker][] or pull requests!
+Please, report bugs and issues as I won't be able to cover all the TeX
+formats on arXiv. Feel free to send me ideas through the [issue tracker][]
+or pull requests!
 
 [issue tracker]: http://bitbucket.org/nye17/kindlize/issues
