@@ -156,8 +156,8 @@ Determines which pdf viewer to preview the generated pdfs. `mupdf` is
 strongly recommended.
  
 
-Useage
-------
+Usage
+-----
 
 To kindlize an arXiv article, simply do
 
