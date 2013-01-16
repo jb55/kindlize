@@ -164,11 +164,13 @@ Usage
 
 To kindlize an arXiv article, simply do
 
-    kindlize 1211.1379 astrocoffee
+    $ kindlize 1211.1379 astrocoffee
 
-where [`1211.1379`](http://arxiv.org/abs/1211.1379) is the arXiv identifier
-for the paper you want to read, and `astrocoffee` is the name of the directory
-you want to keep this file under your `dropDir` and `incomingDir`. 
+where [`1211.1379`](http://arxiv.org/abs/1211.1379) is the arXiv identifier for
+the paper you want to read, and `astrocoffee` is the name of the subdirectory
+you want to keep this file under your `dropDir` and `incomingDir`. If you
+don't want to bother with organizing your pdfs, simply substitute `astrocoffee`
+with `.`.
 
 As indicated by `example.cfg`, I have created a local directory
 `~/Dropbox/kindle_sync/` as my `dropDir` for storing kindlized pdfs, so that
@@ -184,7 +186,7 @@ my computer. To synchronize, simply plug in your Kindle and make sure that
 the Kindle filesystem is accessible (e.g., in my case, `/media/Kindle/`
 exists.), then run
 
-    kindlize
+    $ kindlize
 
 without arguments. This will force the Kindle `incomingDir` directory to
 be exactly the same as your local `dropDir` directory (i.e., files could
@@ -196,7 +198,7 @@ however, you have to reboot your Kindle to see it in action ;-(.
 
 You can always type
 
-    kindlize -h
+    $ kindlize -h
 
 for help.
 
