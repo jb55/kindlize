@@ -17,9 +17,11 @@ that the new pdf file is Kindle-friendly.
 _CAVEAT_
 
 Currently Kindlize only works with `astro-ph` posts on arXiv, but it could
-be easily adapted to other fields by adding related journal LaTeX style
-files. Please let me know if you want to work on implementing Kindlize for
-fields outside of Astrophysics.
+be easily adapted to other fields by adding LaTeX style files for relevant
+journals. Please let me know if you want to work on implementing Kindlize
+for fields outside of Astrophysics.
+
+
 
 
 Screenshots
@@ -66,7 +68,9 @@ otherwise you can download tarball from
 [here](https://bitbucket.org/nye17/kindlize/downloads), then
     
     $ tar zxvf kindlize-0.0.1.tar.gz
-    
+
+to de-compress under your current directory.
+
 To install,
 
     $ cd kindlize
@@ -83,22 +87,23 @@ Workflow
 It is useful to explain the ideal workflow using Kindlize. There are three
 major goals I want to achieve for a hassle-free reading experience:
 
-* Converting the tarball downloaded from arXiv into Kindle-friendly pdf given arXiv id.
+* Converting the source tarball downloaded from arXiv server into Kindle-friendly pdf for any arXiv-id.
 * Maintaining a local directory of "kindlized" pdfs among multiple computers (using Dropbox).
-* Synchronizing the Kindle arXiv content to the local directory. 
+* Synchronizing your Kindle arXiv content to the local directory on your computer. 
 
-Kindlize is designed to take care of all three goals with some help from
+Kindlize is designed to take care of all three goals, with some help from
 Dropbox (simply by storing your local copy of kindlized pdfs inside your
 Dropbox directory).
 
-Before typing `kindlize` on your terminal, you need to configurate Kindlize first.
+However, before typing `kindlize` on your terminal, you need to configurate
+Kindlize first. Let's get started!
 
 
 Configuration
 -------------
 
 Obviously, Kindlize needs to understand the filesystems of both your computer
-and Kindlize device - where to put temporary files during compiling, where
+and Kindlize device - like, where to put temporary files during compiling, where
 to put kindlized pdfs on your computer and on your Kindle, etc. For this
 purpose, Kindlize needs to read a configuration file under your home directory
 `~/.kindle.cfg`. You can modify the `example.cfg` file that comes with the
@@ -106,7 +111,7 @@ source package and copy it to your local home directory,
 
     $ copy example.cfg ~/.kindle.cfg
 
-The required items in `~/.kindle.cfg` are
+and tailor it to your own needs. The required items in `~/.kindle.cfg` are
 
 ## [general]
 
@@ -121,27 +126,32 @@ help on tests).
 
 ### tmpDir=~/tmp
 
-Determines where the TeX file will be unpacked and compiled into pdfs.
+Determines where the TeX file will be unpacked and compiled into pdfs. A
+standard `tmp` directory would be ideal.
 
 ### dropDir=~/Dropbox/kindle_sync/
 
 Determines where on your local directory you want to store a backup of your
-Kindlized pdfs. Here I put it as a subdirectry within my Dropbox folder.
+Kindlized pdfs. Here I put it as a subdirectry within my Dropbox folder,
+so that I could select and process the desired pdfs on my office machine,
+then sync and update my Kindle using my home computer later. You need to
+create `dropDir` on your computer manually.
 
 ### incomingDir=/media/Kindle/documents/Incoming/
 
 Tells Kindlize where your Kindle content will show up in your file system
 (i.e., the `/media/Kindle` part) and which subdirectory you want to store the
 arXiv files (i.e., the `documents/Incoming` part). Note that `incomingDir`
-will always be synced to `dropDir`.
+will always be synced to `dropDir`. You also need to create `incomingDir`
+on your Kindle manually.
 
 ## [LaTeX]
 
 ### font=charter
 
-Determines which LaTeX font package to use for pdfs. You have to
-make sure they are available in your LaTeX environment if you do
-`\usepackage{YOUR_CHOICE_OF_FONT}`.
+Determines which LaTeX font package to use for pdfs. You have
+to make sure they are available in your LaTeX environment - place
+`\usepackage{YOUR_CHOICE_OF_FONT}` in your test LaTeX file and compile.
 
 ### fontheight=14pt
 
@@ -155,7 +165,7 @@ Determines the baseline of your fonts.
 
 ### pdfviewer=mupdf
 
-Determines which pdf viewer to preview the generated pdfs. `mupdf` is
+Determines which pdf viewer to preview the generated pdfs on your computer. `mupdf` is
 strongly recommended.
  
 
@@ -193,7 +203,7 @@ be exactly the same as your local `dropDir` directory (i.e., files could
 be either added or deleted from your Kindle!). This command will also send
 the newly added pdfs to the right `collection` on your Kindle. For example,
 `Zu12.pdf` file will appear in the `incoming - astrocoffee` collection,
-however, you have to reboot your Kindle to see it in action ;-(.
+however, you have to reboot your Kindle to see the new `collection` in action ;-(.
 
 
 You can always type
@@ -202,6 +212,8 @@ You can always type
 
 for help.
 
+
+And last, enjoy reading!
 
 
 Contributing
