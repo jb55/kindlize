@@ -1,4 +1,4 @@
-#Last-modified: 15 Jan 2013 08:42:58 PM
+#Last-modified: 21 Mar 2013 06:51:14 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -260,7 +260,7 @@ def getOpt(classoption):
         print("no class options")
     return(hasoptbracket, classopts)
 
-def handleOldTeX(texversion, desdir) :
+def handleOldTeX(texversion, clibDir, desdir) :
     """ copy all the old style files so that the old TeX file can be compiled.
     """
     if texversion == "latex2.09" :
@@ -314,26 +314,38 @@ def file_exists(file):
     except :
         return(False)
 
-def parse_documentclass(classname, classopts):
+def parse_documentclass(classname, classopts, desdir):
     if classname == "old" :
         return("default", None, None)
     col_set = "default"
+    onecol_arg = "onecolumn"
+    twocol_arg = "twocolumn"
     if (classname == "elsart_mm"  or classname == "aa"      or
         classname == "emulateapj" or classname == "aastex"  or 
         classname == "elsarticle" or classname == "revtex4" or
         classname == "mn2e"       or classname == "article") :
         print("Journal Name: %20s"%jname[classname])
         print("`one/twocolumn` option is available")
-        onecol_arg = "onecolumn"
-        twocol_arg = "twocolumn"
         if onecol_arg in classopts :
             col_set = "one"
         elif twocol_arg in classopts :
             col_set = "two"
-#    elif classname == "aa" :
-#        print("Journal Name: AA")
     else :
-        raise RuntimeError("unknown documentclass, please update library")
+        print("unknown documentclass, searching the current directory...")
+        _clsfile = os.path.join(desdir, classname + ".cls")
+        if file_exists(_clsfile) :
+            print("%s found, continue to next step" % _clsfile)
+            # if onecol_arg can be found in the local clsfile, repeat above
+            if findstr(_clsfile, onecol_arg) :
+                if onecol_arg in classopts :
+                    col_set = "one"
+                elif twocol_arg in classopts :
+                    col_set = "two"
+            else :
+                return("default", None, None)
+        else :
+            print("%s not found" % _clsfile)
+            raise RuntimeError("unknown documentclass, please update library")
 
     if col_set == "one":
         print("`onecolumn` enabled")
@@ -362,6 +374,12 @@ def substituteAll(file, pattern, subst):
     os.remove(file)
     #Move new file
     shutil.move(abs_path, file)
+
+def findstr(file, str) :
+    f = open(file, 'r')
+    lines = f.read()
+    answer = lines.find(str)
+    return(answer)
 
 def replaceAll(file, pattern, subst):
     #Create temp file
@@ -456,7 +474,7 @@ def convert(filename, year, saveDir, clibDir, dropDir, font, fontheight, fontwid
     # go through all files
     masterfile, texversion = getMaster(texfiles, desdir)
     # deal with old latex2.09 files
-    handleOldTeX(texversion, desdir)
+    handleOldTeX(texversion, clibDir, desdir)
     # copy bbl files if there is one
     getBiblio(bblfiles, desdir)
     # examine documentclass and find author
@@ -466,7 +484,7 @@ def convert(filename, year, saveDir, clibDir, dropDir, font, fontheight, fontwid
     # find options of documentclass
     hasoptbracket, classopts = getOpt(classoption)
     # parse documentclass and options
-    col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts)
+    col_set, onecol_arg, twocol_arg = parse_documentclass(classname, classopts, desdir)
     # heavy duty modification of the master TeX file
     kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg, fontstr, magnifystr)
     # recompile
