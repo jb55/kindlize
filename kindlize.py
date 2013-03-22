@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-modified: 15 Jan 2013 12:14:10 AM
+# Last-modified: 22 Mar 2013 12:28:13 AM
 
 import os.path
 import pkgutil
@@ -69,12 +69,12 @@ def _main():
     origDir = os.path.dirname(os.path.realpath(__file__))
     # expand HOME variable to get full directories.
     saveDir     = os.path.expanduser(config.tmpDir)
-    clibDir     = os.path.expanduser(os.path.join(origDir, 
-        "kindlize_src", "clslib"))
+    clibDir     = os.path.expanduser(os.path.join(origDir, "kindlize_src", "clslib"))
     dropDir     = os.path.expanduser(config.dropDir)
+    mountDir    = os.path.expanduser(config.mountDir)
     incomingDir = os.path.expanduser(config.incomingDir)
     # get the relative path of incomingDir under document/
-    result = re.search('Kindle/documents/(.*)', incomingDir)
+    result = re.search(os.path.join(mountDir, 'documents')+'/(.*)', incomingDir)
     subDir = result.group(1)
     # print("Please make sure subdir %s exists in your Kindle" % subDir)
     # read commandline arguments.
@@ -94,7 +94,7 @@ def _main():
     else :
         if detect_kindle(incomingDir) :
             sync_kindle_folder(dropDir, incomingDir)
-            cln = Collection()
+            cln = Collection(mountDir)
             if where == "." :
                 # prevent funky "/./" in folder
                 folder = subDir

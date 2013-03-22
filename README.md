@@ -137,10 +137,16 @@ so that I could select and process the desired pdfs on my office machine,
 then sync and update my Kindle using my home computer later. You need to
 create `dropDir` on your computer manually.
 
+### mountDir=/media/Kindle/
+
+The mount point of your Kindle device. You have to make sure that `mountDir` is
+writable by your user account.
+
 ### incomingDir=/media/Kindle/documents/Incoming/
 
 Tells Kindlize where your Kindle content will show up in your file system
-(i.e., the `/media/Kindle` part) and which subdirectory you want to store the
+(i.e., the `/media/Kindle` part, which should be the same as `mountDir`) 
+and which subdirectory you want to store the
 arXiv files (i.e., the `documents/Incoming` part). Note that `incomingDir`
 will always be synced to `dropDir`. You also need to create `incomingDir`
 on your Kindle manually.

@@ -15,6 +15,7 @@ class Config(object):
             'device'      : config.get('general', 'device'),
             'tmpDir'      : config.get('directory', 'tmpDir'),
             'dropDir'     : config.get('directory', 'dropDir'),
+            'mountDir'    : config.get('directory', 'mountDir'),
             'incomingDir' : config.get('directory', 'incomingDir'),
             'font'        : config.get('LaTeX', 'font'),
             'fontheight'  : config.get('LaTeX', 'fontheight'),
