@@ -1,4 +1,4 @@
-#Last-modified: 21 Mar 2013 06:51:14 PM
+#Last-modified: 02 Apr 2013 12:23:22 AM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -166,7 +166,8 @@ def checkMaster(masterfile, texversion) :
     classoption = None
     firstauthor = None
     f = open(masterfile, "r")
-    p = re.compile("[^\%]documentclass(.*)\{(\w+)\}")
+    # now the classname could be any non-space character.
+    p = re.compile("[^\%]documentclass(.*)\{(\S+)\}")
     q = re.compile("[^\%]author\{([\w|\s|\.|\~]+)")
     # this need to be constantly improved.
     q_mn  = re.compile("[^\%]author\[([\w|\s|\.|\~|\\\\|\&]*)\]")
@@ -222,11 +223,12 @@ def getClass(classname, clibDir, clsfiles, bstfiles, desdir):
         else :
             raise KindleException("failed to find it in the cls library")
     # extra files
-    if classname == "revtex4" or classname == "emulateapj" :
+    if classname == "revtex4" or classname == "emulateapj" or classname == "revtex4-1" :
         shutil.copy(os.path.join(clibDir, "revsymb.sty"), desdir)
         shutil.copy(os.path.join(clibDir, "aps.rtx.tex"), desdir)
         shutil.copy(os.path.join(clibDir, "10pt.rtx.tex"), desdir)
         shutil.copy(os.path.join(clibDir, "revtex4.cls"), desdir)
+        shutil.copy(os.path.join(clibDir, "revtex4-1.cls"), desdir)
         shutil.copy(os.path.join(clibDir, "epsf.sty"), desdir)
         shutil.copy(os.path.join(clibDir, "apjfonts.sty"), desdir)
         shutil.copy(os.path.join(clibDir, "rmp.rtx"), desdir)
