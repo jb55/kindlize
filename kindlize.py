@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-# Last-modified: 22 Mar 2013 12:28:13 AM
+# Last-modified: 24 Apr 2013 09:47:36 PM
 
 import os.path
 import pkgutil
@@ -102,7 +102,7 @@ def _main():
                 folder = os.path.join(subDir, where)
             cln.forage(folder=folder)
             cln.save()
-            print("Kindle Collection is updated (required reboot of your Kindle devide).")
+            print("Kindle Collection is updated (required reboot of your Kindle device).")
 
 
     
