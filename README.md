@@ -2,6 +2,17 @@
 Kindlize
 ========
 
+Changelog
+---------
+
+### 0.1.0 ###
+
+    * 07 May 2013: fixed several packaging errors in previous tar balls.
+
+
+Introduction
+------------
+
 Tired and/or guilty of printing out arXiv pre-prints everyday? Frustrated by
 the experience of reading two-column journal articles on your Kindle e-reader?
 
@@ -67,7 +78,7 @@ the source
 otherwise you can download tarball from
 [here](https://bitbucket.org/nye17/kindlize/downloads), then
     
-    $ tar zxvf kindlize-0.0.1.tar.gz
+    $ tar zxvf kindlize-0.1.0.tar.gz
 
 to de-compress under your current directory.
 
