@@ -1,0 +1,3 @@
+include *.md *.cfg
+recursive-include kindlize_src *.cls *.sty *.bst *.rtx Makefile*
+recursive-include screenshots *.png
