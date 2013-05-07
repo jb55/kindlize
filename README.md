@@ -7,7 +7,7 @@ Changelog
 
 ### 0.1.0 ###
 
-    * 07 May 2013: fixed several packaging errors in previous tar balls.
+* 07 May 2013: fixed several packaging errors in previous tar balls.
 
 
 Introduction
