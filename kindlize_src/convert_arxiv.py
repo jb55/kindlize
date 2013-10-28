@@ -1,4 +1,4 @@
-#Last-modified: 02 Apr 2013 12:23:22 AM
+#Last-modified: 28 Oct 2013 06:28:17 PM
 import os
 from urlparse import urlsplit
 from tempfile import mkstemp
@@ -519,6 +519,9 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
                 replaceAll(masterfile, "documentclass", "documentclass["+onecol_arg+"]")
         else :
             print("Nothing I can do about, stay with default, maybe you are lucky")
+    # need to remove any predefined geometry setttings. 
+    p = re.compile(r"^\\usepackage.*{geometry}")
+    substituteAll(masterfile, p, "")
     # add geostr - to fit in the screen size of kindle DX
     p = re.compile(r"^\\begin{document}")
     if classname == "emulateapj" :
