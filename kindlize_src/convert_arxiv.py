@@ -12,6 +12,7 @@ import re
 
 # syle regexp taken directly from arxiv2bib
 NEW_STYLE = re.compile(r'\d{4}\.\d{4}(v\d+)?$')
+NEW_STYLE2 = re.compile(r'\d{4}\.\d{5}(v\d+)?$')
 OLD_STYLE = re.compile( r'(astro-ph)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
 
 # geometry configuration
@@ -52,7 +53,7 @@ def download(url, saveDir):
         localName = r.info()['Content-Disposition'].split('filename=')[1]
         if localName[0] == '"' or localName[0] == "'":
             localName = localName[1:-1]
-    elif r.url != url: 
+    elif r.url != url:
         # if we were redirected, the real file name we take from the final URL
         localName = url2name(r.url)
     # get it to a default directory
@@ -130,7 +131,7 @@ def getMaster(texfiles, desdir):
     if masterfile is None :
         raise KindleException("missing master tex file or stone-age tex version?")
     return(masterfile, texversion)
-            
+
 def getBiblio(bblfiles, desdir):
     """ copy bbl if there is one and only one such file """
     if len(bblfiles) == 1 :
@@ -150,10 +151,10 @@ def checkMaster(masterfile, texversion) :
         q = re.compile("[^\%]author[\[|\]|\w|\s|\.|\~]*\{([\w|\s|\.|\~]+)")
         for line in f.readlines():
             qresult = q.match(line)
-            if qresult : 
+            if qresult :
                 firstauthor = qresult.group(1)
                 break
-        if qresult : 
+        if qresult :
             try :
                 author = firstauthor.split()[-1]
             except IndexError :
@@ -186,7 +187,7 @@ def checkMaster(masterfile, texversion) :
         else :
             qresult = q.match(line)
         #
-        if qresult : 
+        if qresult :
             firstauthor = qresult.group(1)
             break
     f.close()
@@ -323,7 +324,7 @@ def parse_documentclass(classname, classopts, desdir):
     onecol_arg = "onecolumn"
     twocol_arg = "twocolumn"
     if (classname == "elsart_mm"  or classname == "aa"      or
-        classname == "emulateapj" or classname == "aastex"  or 
+        classname == "emulateapj" or classname == "aastex"  or
         classname == "elsarticle" or classname == "revtex4" or
         classname == "mn2e"       or classname == "article") :
         print("Journal Name: %20s"%jname[classname])
@@ -356,7 +357,7 @@ def parse_documentclass(classname, classopts, desdir):
     else :
         print("the existing file uses default column settting")
     return(col_set, onecol_arg, twocol_arg)
-        
+
 def substituteAll(file, pattern, subst):
     #Create temp file
     fh, abs_path = mkstemp()
@@ -440,6 +441,8 @@ def is_new(id):
     """
     if NEW_STYLE.match(id) is not None :
         return(True)
+    elif NEW_STYLE2.match(id) is not None :
+        return(True)
     elif OLD_STYLE.match(id) is not None:
         return(False)
     else :
@@ -501,7 +504,7 @@ def convert(filename, year, saveDir, clibDir, dropDir, font, fontheight, fontwid
 def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol_arg, fontstr, magnifystr):
     """ diagonose the master TeX file.
     """
-    # make onecolumn pdf 
+    # make onecolumn pdf
     if col_set == "one" :
         pass
     elif col_set == "two" :
@@ -519,7 +522,7 @@ def kindlizeit(masterfile, hasoptbracket, classname, col_set, onecol_arg, twocol
                 replaceAll(masterfile, "documentclass", "documentclass["+onecol_arg+"]")
         else :
             print("Nothing I can do about, stay with default, maybe you are lucky")
-    # need to remove any predefined geometry setttings. 
+    # need to remove any predefined geometry setttings.
     p = re.compile(r"^\\usepackage.*{geometry}")
     substituteAll(masterfile, p, "")
     # add geostr - to fit in the screen size of kindle DX
