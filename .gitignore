@@ -1,5 +1,3 @@
-syntax: glob
-
 *.pyc
 *.pyo
 *.swp
@@ -13,4 +11,3 @@ syntax: glob
 dist/**
 build/**
 kindlize.egg-info/**
-
