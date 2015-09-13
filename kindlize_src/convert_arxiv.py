@@ -13,7 +13,7 @@ import re
 # syle regexp taken directly from arxiv2bib
 NEW_STYLE = re.compile(r'\d{4}\.\d{4}(v\d+)?$')
 NEW_STYLE2 = re.compile(r'\d{4}\.\d{5}(v\d+)?$')
-OLD_STYLE = re.compile( r'(astro-ph)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
+OLD_STYLE = re.compile( r'([\w-]+)' + r'(\.[A-Z]{2})?/\d{7}(v\d+)?$' )
 
 # geometry configuration
 geostr     = "\usepackage[paperwidth=13.8cm, paperheight=22.0cm, top=0.5cm, left=0.5cm, right=0.5cm, bottom= 0.5cm]{geometry}\n"
@@ -427,7 +427,7 @@ def getTar(arxivid, saveDir):
     elif chkres is False :
         num = arxivid.split("/")[-1]
         year = num[0:2]
-        url = "".join(["http://arxiv.org/e-print/astro-ph/", num])
+        url = "".join(["http://arxiv.org/e-print/cs/", num])
     else :
         raise RuntimeError("invalid id, please check your input")
     print("downloading source from %s" % url)
